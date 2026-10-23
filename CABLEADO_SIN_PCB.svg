@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1180" height="2845" viewBox="0 0 1180 2845">
+<rect width="100%" height="100%" fill="white"/>
+<style>text{font-family:Consolas,monospace;fill:#172433}.title{font-size:25px;font-weight:bold}.head{font-size:18px;font-weight:bold}.wire{font-size:17px}</style>
+<text x="30" y="38" class="title">CMCV ? CABLEADO SIN PCB / REVISION 3</text>
+<text x="30" y="70" class="wire">Montaje de banco consolidado. Entrada de vehiculo y software autonomo pendientes.</text>
+<rect x="20" y="105" width="1140" height="497" rx="8" fill="#f4f7fa" stroke="#7890a5"/>
+<text x="38" y="135" class="head">1. ALIMENTACION: DOS LM2596 EN PARALELO POR LA ENTRADA</text>
+<text x="38" y="165" class="wire" xml:space="preserve">Fuente de banco / VIN protegido ----+---- LM MOTOR IN+</text>
+<text x="38" y="189" class="wire" xml:space="preserve">                                   +---- LM LOGICA IN+</text>
+<text x="38" y="213" class="wire" xml:space="preserve">GND COMUN -------------------------+---- ambos IN-</text>
+<text x="38" y="237" class="wire" xml:space="preserve"></text>
+<text x="38" y="261" class="wire" xml:space="preserve">LM MOTOR OUT+ (ajustado a 12 V) ---------- TB6612 VM</text>
+<text x="38" y="285" class="wire" xml:space="preserve">LM LOGICA OUT+ (ajustado a 5 V) ---------- Pico VSYS (39)</text>
+<text x="38" y="309" class="wire" xml:space="preserve">Ambos OUT- ----------------------------- GND COMUN</text>
+<text x="38" y="333" class="wire" xml:space="preserve">Pico GND (38) -------------------------- GND COMUN</text>
+<text x="38" y="357" class="wire" xml:space="preserve">TB6612 todos sus GND ------------------- GND COMUN</text>
+<text x="38" y="381" class="wire" xml:space="preserve">Pico 3V3 OUT (36) --------+-------------- TB6612 VCC</text>
+<text x="38" y="405" class="wire" xml:space="preserve">                         +-------------- Hall VCC</text>
+<text x="38" y="429" class="wire" xml:space="preserve"></text>
+<text x="38" y="453" class="wire" xml:space="preserve">NO unir OUT+ de 12 V con OUT+ de 5 V.</text>
+<text x="38" y="477" class="wire" xml:space="preserve">Conexion directa a VSYS: desconectar los 5 V externos para usar USB.</text>
+<text x="38" y="501" class="wire" xml:space="preserve">No conectar 5 V a 3V3. Ajustar ambos bucks antes de conectarlos.</text>
+<text x="38" y="525" class="wire" xml:space="preserve">Los LM2596 reducen tension: 12 V de entrada no garantizan 12 V de salida.</text>
+<text x="38" y="549" class="wire" xml:space="preserve">Vehiculo: C1442.1 -&gt; fusible + proteccion pendiente -&gt; VIN.</text>
+<text x="38" y="573" class="wire" xml:space="preserve">C1442.2 -&gt; GND COMUN. Esta entrada aun no esta validada para el vehiculo.</text>
+<rect x="20" y="620" width="1140" height="545" rx="8" fill="#f4f7fa" stroke="#7890a5"/>
+<text x="38" y="650" class="head">2. TB6612 Y MOTOR: RESPETAR LAS ETIQUETAS DEL MODULO REAL</text>
+<text x="38" y="680" class="wire" xml:space="preserve">Pico GP2 (4) -------------------- AIN1 + BIN1</text>
+<text x="38" y="704" class="wire" xml:space="preserve">Pico GP3 (5) -------------------- AIN2 + BIN2</text>
+<text x="38" y="728" class="wire" xml:space="preserve">Pico GP4 (6) -------------------- PWMA + PWMB</text>
+<text x="38" y="752" class="wire" xml:space="preserve">Pico GP5 (7) --------+----------- STBY</text>
+<text x="38" y="776" class="wire" xml:space="preserve">                     +--[10k]--- GND     (pull-down externo)</text>
+<text x="38" y="800" class="wire" xml:space="preserve"></text>
+<text x="38" y="824" class="wire" xml:space="preserve">AO1 + BO1 ----------------------+---- MOTOR borne 1</text>
+<text x="38" y="848" class="wire" xml:space="preserve">                                |</text>
+<text x="38" y="872" class="wire" xml:space="preserve">                          [104 / 100 nF]</text>
+<text x="38" y="896" class="wire" xml:space="preserve">                                |</text>
+<text x="38" y="920" class="wire" xml:space="preserve">AO2 + BO2 ----------------------+---- MOTOR borne 2</text>
+<text x="38" y="944" class="wire" xml:space="preserve"></text>
+<text x="38" y="968" class="wire" xml:space="preserve">104 ceramico &gt;=50 V: directamente en los bornes, patas cortas.</text>
+<text x="38" y="992" class="wire" xml:space="preserve">Los bornes del motor NO van a GND. No unir borne 1 y borne 2.</text>
+<text x="38" y="1016" class="wire" xml:space="preserve">Trenzar entre si los dos cables del motor.</text>
+<text x="38" y="1040" class="wire" xml:space="preserve">Entradas y PWM de ambos canales unidos fisicamente.</text>
+<text x="38" y="1064" class="wire" xml:space="preserve">Sin puente fijo entre STBY y VCC.</text>
+<text x="38" y="1088" class="wire" xml:space="preserve">Verificar desacoplo local del modulo: 100 nF VM-GND y VCC-GND.</text>
+<text x="38" y="1112" class="wire" xml:space="preserve">470 uF / 35 V disponible: (+) a VM, (-) a GND, junto al driver.</text>
+<text x="38" y="1136" class="wire" xml:space="preserve">Ese capacitor no sustituye la proteccion de entrada del vehiculo.</text>
+<rect x="20" y="1183" width="1140" height="545" rx="8" fill="#f4f7fa" stroke="#7890a5"/>
+<text x="38" y="1213" class="head">3. HALL SS49E: FILTRO PROBADO</text>
+<text x="38" y="1243" class="wire" xml:space="preserve">Pico 3V3 (36) --------+---------- Hall VCC</text>
+<text x="38" y="1267" class="wire" xml:space="preserve">                      |</text>
+<text x="38" y="1291" class="wire" xml:space="preserve">                   [104] 100 nF     JUNTO AL SENSOR</text>
+<text x="38" y="1315" class="wire" xml:space="preserve">                      |</text>
+<text x="38" y="1339" class="wire" xml:space="preserve">Pico AGND (33) -------+---------- Hall GND</text>
+<text x="38" y="1363" class="wire" xml:space="preserve"></text>
+<text x="38" y="1387" class="wire" xml:space="preserve">Hall OUT ---- cable ----[1k]----+---- Pico GP26 / ADC0 (31)</text>
+<text x="38" y="1411" class="wire" xml:space="preserve">                               |</text>
+<text x="38" y="1435" class="wire" xml:space="preserve">                            [103] 10 nF   JUNTO AL PICO</text>
+<text x="38" y="1459" class="wire" xml:space="preserve">                               |</text>
+<text x="38" y="1483" class="wire" xml:space="preserve">Pico AGND (33) -----------------+</text>
+<text x="38" y="1507" class="wire" xml:space="preserve"></text>
+<text x="38" y="1531" class="wire" xml:space="preserve">AGND y GND son la misma red electrica del Pico.</text>
+<text x="38" y="1555" class="wire" xml:space="preserve">Hall GND vuelve al Pico; no transportar corriente del motor por el.</text>
+<text x="38" y="1579" class="wire" xml:space="preserve">Llevar OUT junto con el retorno GND del Hall.</text>
+<text x="38" y="1603" class="wire" xml:space="preserve">Si motor y Hall comparten recorrido, usar pares separados.</text>
+<text x="38" y="1627" class="wire" xml:space="preserve">Conservar el orden de patas del sensor ya comprobado.</text>
+<text x="38" y="1651" class="wire" xml:space="preserve">No agregar la resistencia de 100k del esquema antiguo.</text>
+<text x="38" y="1675" class="wire" xml:space="preserve">A = Hall alto / cerrado. B = Hall bajo / abierto.</text>
+<text x="38" y="1699" class="wire" xml:space="preserve">Montaje actual: sentido 1 abre B; sentido 2 cierra A.</text>
+<rect x="20" y="1746" width="1140" height="545" rx="8" fill="#f4f7fa" stroke="#7890a5"/>
+<text x="38" y="1776" class="head">4. COMANDO PCM: PC817 Y DIODO ANTIPARALELO</text>
+<text x="38" y="1806" class="wire" xml:space="preserve">C1442.1 VPWR ----[10k / 1/4 W]----+---- PC817 pata 1 (anodo)</text>
+<text x="38" y="1830" class="wire" xml:space="preserve">                                 |</text>
+<text x="38" y="1854" class="wire" xml:space="preserve">                         K [1N4007] A</text>
+<text x="38" y="1878" class="wire" xml:space="preserve">                                 |</text>
+<text x="38" y="1902" class="wire" xml:space="preserve">C1442.3 CMCV --------------------+---- PC817 pata 2 (catodo)</text>
+<text x="38" y="1926" class="wire" xml:space="preserve"></text>
+<text x="38" y="1950" class="wire" xml:space="preserve">Diodo: banda K a pata 1; extremo A a pata 2 del PC817.</text>
+<text x="38" y="1974" class="wire" xml:space="preserve">Pico GP15 (20) ----------------------- PC817 pata 4 (colector)</text>
+<text x="38" y="1998" class="wire" xml:space="preserve">Pico GND ---------------------------- PC817 pata 3 (emisor)</text>
+<text x="38" y="2022" class="wire" xml:space="preserve">GP15 usa PULL_UP interno; no agregar pull-up a 5 V.</text>
+<text x="38" y="2046" class="wire" xml:space="preserve"></text>
+<text x="38" y="2070" class="wire" xml:space="preserve">PC817 DIP4 visto DESDE ARRIBA, muesca hacia arriba:</text>
+<text x="38" y="2094" class="wire" xml:space="preserve">                         ___U___</text>
+<text x="38" y="2118" class="wire" xml:space="preserve">                  A  1  |       |  4  C</text>
+<text x="38" y="2142" class="wire" xml:space="preserve">                  K  2  |_______|  3  E</text>
+<text x="38" y="2166" class="wire" xml:space="preserve"></text>
+<text x="38" y="2190" class="wire" xml:space="preserve">C1442.2 PWRGND -&gt; GND COMUN (montaje completo).</text>
+<text x="38" y="2214" class="wire" xml:space="preserve">C1442.4 CMCVM -&gt; SIN CONECTAR, extremo aislado.</text>
+<text x="38" y="2238" class="wire" xml:space="preserve">GP18 (24) -&gt; libre: no montar Monitor en esta revision.</text>
+<text x="38" y="2262" class="wire" xml:space="preserve">El conjunto tiene GND comun; los LM2596 no aportan aislamiento.</text>
+<rect x="20" y="2309" width="1140" height="473" rx="8" fill="#f4f7fa" stroke="#7890a5"/>
+<text x="38" y="2339" class="head">5. INDICADORES OPCIONALES Y MONTAJE SIN PCB</text>
+<text x="38" y="2369" class="wire" xml:space="preserve">GP16 (21) ----[1k]---- anodo LED VERDE; catodo -&gt; GND</text>
+<text x="38" y="2393" class="wire" xml:space="preserve">GP17 (22) ----[1k]---- anodo LED ROJO;  catodo -&gt; GND</text>
+<text x="38" y="2417" class="wire" xml:space="preserve">Los LED requieren programa que los controle; la prueba de banco</text>
+<text x="38" y="2441" class="wire" xml:space="preserve">actual no los maneja. No indican por si solos posicion confirmada.</text>
+<text x="38" y="2465" class="wire" xml:space="preserve">GP28 (34) libre: divisor VM no montado en esta revision de banco.</text>
+<text x="38" y="2489" class="wire" xml:space="preserve"></text>
+<text x="38" y="2513" class="wire" xml:space="preserve">Fijar modulos a una base aislante con separadores y tornillos.</text>
+<text x="38" y="2537" class="wire" xml:space="preserve">Potencia: cables cortos, borneras/crimpado o uniones soldadas aisladas.</text>
+<text x="38" y="2561" class="wire" xml:space="preserve">No usar Dupont como conexion permanente de potencia.</text>
+<text x="38" y="2585" class="wire" xml:space="preserve">Cubrir cada union y pata expuesta con termorretractil.</text>
+<text x="38" y="2609" class="wire" xml:space="preserve">Sujetarlos para que vibracion y tirones no carguen las soldaduras.</text>
+<text x="38" y="2633" class="wire" xml:space="preserve">PC817/resistencias: soldadura punto a punto con patas aisladas</text>
+<text x="38" y="2657" class="wire" xml:space="preserve">individualmente y soporte mecanico; no dejar piezas colgando.</text>
+<text x="38" y="2681" class="wire" xml:space="preserve">Mantener ajustes y disipadores de los bucks accesibles.</text>
+<text x="38" y="2705" class="wire" xml:space="preserve">No encerrar modulos calientes en pegamento o termorretractil.</text>
+<text x="38" y="2729" class="wire" xml:space="preserve">Numeros entre parentesis = pin FISICO del Pico original.</text>
+<text x="38" y="2753" class="wire" xml:space="preserve">Sin corte por sobrecorriente: PWM/timeout no limitan corriente.</text>
+<text x="30" y="2818" class="wire">Leer CONEXIONES_TECNICAS.md para alimentacion USB y limites de esta revision.</text>
+</svg>

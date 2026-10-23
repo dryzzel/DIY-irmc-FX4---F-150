@@ -1,189 +1,139 @@
-# Conexiones tecnicas CMCV
+# Cableado permanente sin PCB ? revision 3
 
-Revision 2 simplificada. [Abrir diagrama SVG](CONEXIONES_TECNICAS.svg).
+[Abrir diagrama tecnico actualizado (SVG)](CABLEADO_SIN_PCB.svg).
 
-Referencia electrica para protoboard y placa perforada. No es un plano por agujeros. Las redes con el mismo nombre se conectan entre si; AGND y GND pertenecen a la misma red, con retornos separados de potencia.
+Montaje punto a punto con los modulos existentes, basado en las pruebas de banco. Motor y engranajes probados; carga real de valvulas y proteccion de alimentacion del vehiculo pendientes. Monitor omitido por decision del usuario.
 
-## 1. ALIMENTACION / REDES COMUNES
+**Este documento sustituye el cableado de la revision 2.** Los antiguos CONEXIONES_TECNICAS.svg/.png/.pdf y ESQUEMA_FINAL son referencias anteriores, no el plano de esta revision.
 
-```text
-C1442.1 VPWR -- F1 -- [PROTECCION ENTRADA] -- VIN
-                     polaridad/transitorios
-                     (dimensionado pendiente)
-
-VIN -------- LM2596 MOTOR.IN+
-GND -------- LM2596 MOTOR.IN- / OUT-
-LM2596 MOTOR.OUT+ -------------------------- VM
-                 ajustar a 12 V bajo carga
-
-VIN -------- LM2596 LOGICA.IN+
-GND -------- LM2596 LOGICA.IN- / OUT-
-LM2596 LOGICA.OUT+ ------------------------- +5V
-                 ajustar a 5 V
-
-+5V -------- D1 SS14 -------- PICO.VSYS (39)
-             A ---> K
-                    banda hacia VSYS
-PICO.3V3 OUT (36) -------------------------- +3V3
-C1442.2 / PICO.GND (38) --------------------- GND
-PICO.AGND (33) ----------------------------- GND
-
-Todos los GND son la misma red electrica.
-Retorno motor/bucks directo al punto comun;
-retorno analogico por AGND, sin corriente motor.
-F1 y protecciones de entrada/VM no dimensionados.
-No confundir +5V, +3V3 y VM.
-```
-
-## 2. PUENTE H / TB6612FNG EN PARALELO
+## 1. ALIMENTACION: DOS LM2596 EN PARALELO POR LA ENTRADA
 
 ```text
-PICO.GP2 (4) -----+----- AIN1
-                  +----- BIN1
-PICO.GP3 (5) -----+----- AIN2
-                  +----- BIN2
-PICO.GP4 (6) -----+----- PWMA
-                  +----- PWMB
-PICO.GP5 (7) -----+----- STBY
-                  |
-                R1 10k
-                  |
-                 GND
+Fuente de banco / VIN protegido ----+---- LM MOTOR IN+
+                                   +---- LM LOGICA IN+
+GND COMUN -------------------------+---- ambos IN-
 
-+3V3 ------------------ VCC
-VM -------------------- VM
-GND ------------------- todos GND / PGND
+LM MOTOR OUT+ (ajustado a 12 V) ---------- TB6612 VM
+LM LOGICA OUT+ (ajustado a 5 V) ---------- Pico VSYS (39)
+Ambos OUT- ----------------------------- GND COMUN
+Pico GND (38) -------------------------- GND COMUN
+TB6612 todos sus GND ------------------- GND COMUN
+Pico 3V3 OUT (36) --------+-------------- TB6612 VCC
+                         +-------------- Hall VCC
 
-AO1 -------------------+---------- M1
-BO1 -------------------+           |
-                               [ MOTOR ]
-AO2 -------------------+           |
-BO2 -------------------+---------- M2
-
-C1 100nF >=50V entre M1 y M2, junto al motor.
-NO unir M1 con M2; ninguno va a GND.
-Unir entradas fisicamente: PWM comun.
-Sin puente fijo STBY-VCC. GP27 (32) libre.
-Potencia por cable soldado/bornera, no protoboard.
+NO unir OUT+ de 12 V con OUT+ de 5 V.
+Conexion directa a VSYS: desconectar los 5 V externos para usar USB.
+No conectar 5 V a 3V3. Ajustar ambos bucks antes de conectarlos.
+Los LM2596 reducen tension: 12 V de entrada no garantizan 12 V de salida.
+Vehiculo: C1442.1 -> fusible + proteccion pendiente -> VIN.
+C1442.2 -> GND COMUN. Esta entrada aun no esta validada para el vehiculo.
 ```
 
-## 3. ENTRADA PCM / U1 PC817
+## 2. TB6612 Y MOTOR: RESPETAR LAS ETIQUETAS DEL MODULO REAL
 
 ```text
-C1442.1 -- R2 10k 1/4W --+----- U1.1 A
-                         |
-                         K
-                     D2 1N4007
-                         A
-                         |
-C1442.3 -----------------+----- U1.2 K
+Pico GP2 (4) -------------------- AIN1 + BIN1
+Pico GP3 (5) -------------------- AIN2 + BIN2
+Pico GP4 (6) -------------------- PWMA + PWMB
+Pico GP5 (7) --------+----------- STBY
+                     +--[10k]--- GND     (pull-down externo)
 
-PICO.GP15 (20) ---------------- U1.4 C
-GND -------------------------- U1.3 E
+AO1 + BO1 ----------------------+---- MOTOR borne 1
+                                |
+                          [104 / 100 nF]
+                                |
+AO2 + BO2 ----------------------+---- MOTOR borne 2
 
-D2 en antiparalelo al LED de U1:
-  banda (K) a U1.1; anodo (A) a U1.2.
-GP15 usa PULL_UP interno a 3.3 V.
-No resistencia pull-up externa en este montaje.
-
-PC817 DIP4: vista SUPERIOR, muesca arriba
-                  _______
-           A 1 --|   U   |-- 4 C
-           K 2 --|_______|-- 3 E
-
-U1 y U2 tienen esta misma numeracion.
-Comprobar marca de pata 1 del componente real.
-C1442: numeracion del diagrama del vehiculo,
-NO inferir izquierda/derecha del conector.
+104 ceramico >=50 V: directamente en los bornes, patas cortas.
+Los bornes del motor NO van a GND. No unir borne 1 y borne 2.
+Trenzar entre si los dos cables del motor.
+Entradas y PWM de ambos canales unidos fisicamente.
+Sin puente fijo entre STBY y VCC.
+Verificar desacoplo local del modulo: 100 nF VM-GND y VCC-GND.
+470 uF / 35 V disponible: (+) a VM, (-) a GND, junto al driver.
+Ese capacitor no sustituye la proteccion de entrada del vehiculo.
 ```
 
-## 4. MONITOR PCM / U2 PC817 + Q1
+## 3. HALL SS49E: FILTRO PROBADO
 
 ```text
-PICO.GP18 (24) --+-- R3 330 -- U2.1 A
-                 |
-               R4 100k
-                 |
-GND -------------+----------- U2.2 K
+Pico 3V3 (36) --------+---------- Hall VCC
+                      |
+                   [104] 100 nF     JUNTO AL SENSOR
+                      |
+Pico AGND (33) -------+---------- Hall GND
 
-+5V ------------------------- U2.4 C
-U2.3 E ----- R5 3.3k ---------+---- Q1.B
-                              |
-                            R6 47k
-                              |
-GND --------------------------+---- Q1.E
-C1442.4 CMCVM --------------------- Q1.C
+Hall OUT ---- cable ----[1k]----+---- Pico GP26 / ADC0 (31)
+                               |
+                            [103] 10 nF   JUNTO AL PICO
+                               |
+Pico AGND (33) -----------------+
 
-Q1 = 2N5551 (NPN)
-B = base; C = colector; E = emisor.
-Confirmar orden fisico E/B/C segun fabricante.
-No se asignan patas por la silueta TO-92.
-
-GP18 alto: Q1 lleva Monitor a GND.
-GP18 bajo: Monitor queda liberado.
-No alimentar C1442.4 desde +5V ni +3V3.
-Capacidad y niveles de esta etapa pendientes
-de verificar con la carga real de la PCM.
-Monitor solo tras posicion abierta confirmada.
+AGND y GND son la misma red electrica del Pico.
+Hall GND vuelve al Pico; no transportar corriente del motor por el.
+Llevar OUT junto con el retorno GND del Hall.
+Si motor y Hall comparten recorrido, usar pares separados.
+Conservar el orden de patas del sensor ya comprobado.
+No agregar la resistencia de 100k del esquema antiguo.
+A = Hall alto / cerrado. B = Hall bajo / abierto.
+Montaje actual: sentido 1 abre B; sentido 2 cierra A.
 ```
 
-## 5. HALL SS49E / SENSOR EXTERNO
+## 4. COMANDO PCM: PC817 Y DIODO ANTIPARALELO
 
 ```text
-+3V3 -------------------------- SS49E.VCC
-AGND (= GND) ------------------- SS49E.GND
+C1442.1 VPWR ----[10k / 1/4 W]----+---- PC817 pata 1 (anodo)
+                                 |
+                         K [1N4007] A
+                                 |
+C1442.3 CMCV --------------------+---- PC817 pata 2 (catodo)
 
-SS49E.OUT -- R7 1k --+--------- PICO.GP26 (31)
-                     |                 |
-                   R8 100k           C2 10nF
-                     |                 |
-AGND ----------------+-----------------+
+Diodo: banda K a pata 1; extremo A a pata 2 del PC817.
+Pico GP15 (20) ----------------------- PC817 pata 4 (colector)
+Pico GND ---------------------------- PC817 pata 3 (emisor)
+GP15 usa PULL_UP interno; no agregar pull-up a 5 V.
 
-C3 100nF entre VCC y GND junto al SS49E.
-Sensor frente a los imanes de la carcasa.
-Confirmar pinout del SS49E real antes de soldar.
-No conectar salida de Hall alimentado a 5V
-al ADC de 3.3V.
+PC817 DIP4 visto DESDE ARRIBA, muesca hacia arriba:
+                         ___U___
+                  A  1  |       |  4  C
+                  K  2  |_______|  3  E
 
-6. DIVISOR DE TENSION VM
-
-VM -- R9 100k 1% --+-- R11 1k --+-- GP28 (34)
-                   |            |
-                R10 22k 1%    C4 10nF
-                   |            |
-AGND --------------+------------+
-
-VM es salida del buck motor, NO bateria.
-El divisor no es proteccion de transitorios.
+C1442.2 PWRGND -> GND COMUN (montaje completo).
+C1442.4 CMCVM -> SIN CONECTAR, extremo aislado.
+GP18 (24) -> libre: no montar Monitor en esta revision.
+El conjunto tiene GND comun; los LM2596 no aportan aislamiento.
 ```
 
-## 7. LEDs / DESACOPLO / MONTAJE
+## 5. INDICADORES OPCIONALES Y MONTAJE SIN PCB
 
 ```text
-GP16 (21) -- R12 1k -- LED1 VERDE A -> K -- GND
-GP17 (22) -- R13 1k -- LED2 ROJO  A -> K -- GND
+GP16 (21) ----[1k]---- anodo LED VERDE; catodo -> GND
+GP17 (22) ----[1k]---- anodo LED ROJO;  catodo -> GND
+Los LED requieren programa que los controle; la prueba de banco
+actual no los maneja. No indican por si solos posicion confirmada.
+GP28 (34) libre: divisor VM no montado en esta revision de banco.
 
-A = anodo; K = catodo. LEDs indican comando.
-
-Conectar condensadores EN PARALELO a las redes:
-  C5  100nF       VM    --||-- GND (driver)
-  C6  470uF/25V   VM (+)--||-- GND (-)
-  C7  100nF       +3V3  --||-- GND (driver)
-  C8  10uF/10V    +3V3(+)||-- GND (-)
-  C9  100nF       +5V   --||-- GND
-  C10 100uF/10V   +5V(+) ||-- GND (-)
-C1, C2, C3 y C4 estan en las secciones anteriores.
-Revisar los condensadores presentes en modulos.
-
-PROTOBOARD: solo logica/senales; potencia externa.
-PERFORADA: pads aislados, puentes soldados.
-Misma conectividad electrica en ambos montajes.
-Cruces no conectan salvo + / punto de union.
-Etiquetas iguales representan LA MISMA RED.
-Numeros entre () = pin fisico del Pico original.
-Los nombres del TB6612 son pines del MODULO.
-No son coordenadas de agujeros ni numero del IC.
-
-Sin sensor/corte por sobrecorriente.
-PWM y timeout no limitan corriente instantanea.
+Fijar modulos a una base aislante con separadores y tornillos.
+Potencia: cables cortos, borneras/crimpado o uniones soldadas aisladas.
+No usar Dupont como conexion permanente de potencia.
+Cubrir cada union y pata expuesta con termorretractil.
+Sujetarlos para que vibracion y tirones no carguen las soldaduras.
+PC817/resistencias: soldadura punto a punto con patas aisladas
+individualmente y soporte mecanico; no dejar piezas colgando.
+Mantener ajustes y disipadores de los bucks accesibles.
+No encerrar modulos calientes en pegamento o termorretractil.
+Numeros entre parentesis = pin FISICO del Pico original.
+Sin corte por sobrecorriente: PWM/timeout no limitan corriente.
 ```
+
+## Alcance de alimentacion y software
+
+- Los dos bucks se alimentan desde el mismo VIN; no estan en cascada en este plano.
+- El fusible de entrada y la proteccion contra polaridad/transitorios no estan dimensionados aqui. El RL207 y el capacitor disponible no se consideran una proteccion automotriz completa. No se prescribe instalar el RL207 en serie con todo el motor sin verificar su corriente y temperatura.
+- La conexion de 5 V a VSYS dibujada no incluye un diodo de aislamiento. Para programar por USB, desconectar fisicamente esa salida de 5 V de VSYS; apagar solo la entrada del buck no equivale a desconectarlo. Conservar GND comun al probar el motor por USB. Si se desea alimentar por USB y buck simultaneamente, implementar primero el circuito de seleccion con Schottky indicado por Raspberry Pi.
+- No aumentar los valores de tension de los bucks para compensar caidas. Verificar VM bajo carga. El LM2596 es reductor, no elevador.
+- No se agrega el pull-down de 100k al Hall del esquema anterior: las capturas actuales corresponden a resistencia serie de 1k, 103 a AGND y 104 de alimentacion.
+- Mantener desacoplo local en el driver; verificar lo que ya incluye el modulo antes de duplicar componentes. El 470uF/35V se propone en VM, no como supresor de transitorios en la entrada de camioneta.
+- `prueba_tb6612.py` sigue siendo manual de banco. La opcion `a` usa umbrales A=40000/B=26000, freno de 50 ms y direccion A=-1. `main.py` aun detiene en rueda libre, requiere divisor VM y configuracion final; DRIVE_ENABLED sigue False. Este plano no habilita un arranque autonomo.
+
+Referencias: [Pico, alimentacion VSYS y USB](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf), [TI LM2596](https://www.ti.com/lit/ds/symlink/lm2596.pdf), [supresion de ruido del motor](https://www.pololu.com/docs/0J15/9).
