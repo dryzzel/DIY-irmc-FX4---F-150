@@ -1,0 +1,172 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1880" height="2170" viewBox="0 0 1880 2170">
+<rect width="100%" height="100%" fill="white"/>
+<style>text{fill:#14202b;font-family:Consolas,monospace;font-size:19px}.title{font-family:Arial;font-size:32px;font-weight:bold}.head{font-family:Arial;font-size:23px;font-weight:bold}</style>
+<text x="35" y="45" class="title">CMCV - CONEXIONES ELECTRICAS / REV. 2 SIMPLIFICADA</text>
+<text x="35" y="78">Diagrama por redes. Valores y terminales explicitos; sin ubicaciones de pines de modulos inventadas.</text>
+<rect x="30" y="110" width="900" height="655" fill="none" stroke="#708090"/>
+<text x="48" y="143" class="head">1. ALIMENTACION / REDES COMUNES</text>
+<text xml:space="preserve" x="48" y="178">C1442.1 VPWR -- F1 -- [PROTECCION ENTRADA] -- VIN</text>
+<text xml:space="preserve" x="48" y="200">                     polaridad/transitorios</text>
+<text xml:space="preserve" x="48" y="222">                     (dimensionado pendiente)</text>
+<text xml:space="preserve" x="48" y="244"></text>
+<text xml:space="preserve" x="48" y="266">VIN -------- LM2596 MOTOR.IN+</text>
+<text xml:space="preserve" x="48" y="288">GND -------- LM2596 MOTOR.IN- / OUT-</text>
+<text xml:space="preserve" x="48" y="310">LM2596 MOTOR.OUT+ -------------------------- VM</text>
+<text xml:space="preserve" x="48" y="332">                 ajustar a 12 V bajo carga</text>
+<text xml:space="preserve" x="48" y="354"></text>
+<text xml:space="preserve" x="48" y="376">VIN -------- LM2596 LOGICA.IN+</text>
+<text xml:space="preserve" x="48" y="398">GND -------- LM2596 LOGICA.IN- / OUT-</text>
+<text xml:space="preserve" x="48" y="420">LM2596 LOGICA.OUT+ ------------------------- +5V</text>
+<text xml:space="preserve" x="48" y="442">                 ajustar a 5 V</text>
+<text xml:space="preserve" x="48" y="464"></text>
+<text xml:space="preserve" x="48" y="486">+5V -------- D1 SS14 -------- PICO.VSYS (39)</text>
+<text xml:space="preserve" x="48" y="508">             A ---&gt; K</text>
+<text xml:space="preserve" x="48" y="530">                    banda hacia VSYS</text>
+<text xml:space="preserve" x="48" y="552">PICO.3V3 OUT (36) -------------------------- +3V3</text>
+<text xml:space="preserve" x="48" y="574">C1442.2 / PICO.GND (38) --------------------- GND</text>
+<text xml:space="preserve" x="48" y="596">PICO.AGND (33) ----------------------------- GND</text>
+<text xml:space="preserve" x="48" y="618"></text>
+<text xml:space="preserve" x="48" y="640">Todos los GND son la misma red electrica.</text>
+<text xml:space="preserve" x="48" y="662">Retorno motor/bucks directo al punto comun;</text>
+<text xml:space="preserve" x="48" y="684">retorno analogico por AGND, sin corriente motor.</text>
+<text xml:space="preserve" x="48" y="706">F1 y protecciones de entrada/VM no dimensionados.</text>
+<text xml:space="preserve" x="48" y="728">No confundir +5V, +3V3 y VM.</text>
+<rect x="955" y="110" width="900" height="655" fill="none" stroke="#708090"/>
+<text x="973" y="143" class="head">2. PUENTE H / TB6612FNG EN PARALELO</text>
+<text xml:space="preserve" x="973" y="178">PICO.GP2 (4) -----+----- AIN1</text>
+<text xml:space="preserve" x="973" y="200">                  +----- BIN1</text>
+<text xml:space="preserve" x="973" y="222">PICO.GP3 (5) -----+----- AIN2</text>
+<text xml:space="preserve" x="973" y="244">                  +----- BIN2</text>
+<text xml:space="preserve" x="973" y="266">PICO.GP4 (6) -----+----- PWMA</text>
+<text xml:space="preserve" x="973" y="288">                  +----- PWMB</text>
+<text xml:space="preserve" x="973" y="310">PICO.GP5 (7) -----+----- STBY</text>
+<text xml:space="preserve" x="973" y="332">                  |</text>
+<text xml:space="preserve" x="973" y="354">                R1 10k</text>
+<text xml:space="preserve" x="973" y="376">                  |</text>
+<text xml:space="preserve" x="973" y="398">                 GND</text>
+<text xml:space="preserve" x="973" y="420"></text>
+<text xml:space="preserve" x="973" y="442">+3V3 ------------------ VCC</text>
+<text xml:space="preserve" x="973" y="464">VM -------------------- VM</text>
+<text xml:space="preserve" x="973" y="486">GND ------------------- todos GND / PGND</text>
+<text xml:space="preserve" x="973" y="508"></text>
+<text xml:space="preserve" x="973" y="530">AO1 -------------------+---------- M1</text>
+<text xml:space="preserve" x="973" y="552">BO1 -------------------+           |</text>
+<text xml:space="preserve" x="973" y="574">                               [ MOTOR ]</text>
+<text xml:space="preserve" x="973" y="596">AO2 -------------------+           |</text>
+<text xml:space="preserve" x="973" y="618">BO2 -------------------+---------- M2</text>
+<text xml:space="preserve" x="973" y="640"></text>
+<text xml:space="preserve" x="973" y="662">C1 100nF &gt;=50V entre M1 y M2, junto al motor.</text>
+<text xml:space="preserve" x="973" y="684">NO unir M1 con M2; ninguno va a GND.</text>
+<text xml:space="preserve" x="973" y="706">Unir entradas fisicamente: PWM comun.</text>
+<text xml:space="preserve" x="973" y="728">Sin puente fijo STBY-VCC. GP27 (32) libre.</text>
+<text xml:space="preserve" x="973" y="750">Potencia por cable soldado/bornera, no protoboard.</text>
+<rect x="30" y="785" width="900" height="655" fill="none" stroke="#708090"/>
+<text x="48" y="818" class="head">3. ENTRADA PCM / U1 PC817</text>
+<text xml:space="preserve" x="48" y="853">C1442.1 -- R2 10k 1/4W --+----- U1.1 A</text>
+<text xml:space="preserve" x="48" y="875">                         |</text>
+<text xml:space="preserve" x="48" y="897">                         K</text>
+<text xml:space="preserve" x="48" y="919">                     D2 1N4007</text>
+<text xml:space="preserve" x="48" y="941">                         A</text>
+<text xml:space="preserve" x="48" y="963">                         |</text>
+<text xml:space="preserve" x="48" y="985">C1442.3 -----------------+----- U1.2 K</text>
+<text xml:space="preserve" x="48" y="1007"></text>
+<text xml:space="preserve" x="48" y="1029">PICO.GP15 (20) ---------------- U1.4 C</text>
+<text xml:space="preserve" x="48" y="1051">GND -------------------------- U1.3 E</text>
+<text xml:space="preserve" x="48" y="1073"></text>
+<text xml:space="preserve" x="48" y="1095">D2 en antiparalelo al LED de U1:</text>
+<text xml:space="preserve" x="48" y="1117">  banda (K) a U1.1; anodo (A) a U1.2.</text>
+<text xml:space="preserve" x="48" y="1139">GP15 usa PULL_UP interno a 3.3 V.</text>
+<text xml:space="preserve" x="48" y="1161">No resistencia pull-up externa en este montaje.</text>
+<text xml:space="preserve" x="48" y="1183"></text>
+<text xml:space="preserve" x="48" y="1205">PC817 DIP4: vista SUPERIOR, muesca arriba</text>
+<text xml:space="preserve" x="48" y="1227">                  _______</text>
+<text xml:space="preserve" x="48" y="1249">           A 1 --|   U   |-- 4 C</text>
+<text xml:space="preserve" x="48" y="1271">           K 2 --|_______|-- 3 E</text>
+<text xml:space="preserve" x="48" y="1293"></text>
+<text xml:space="preserve" x="48" y="1315">U1 y U2 tienen esta misma numeracion.</text>
+<text xml:space="preserve" x="48" y="1337">Comprobar marca de pata 1 del componente real.</text>
+<text xml:space="preserve" x="48" y="1359">C1442: numeracion del diagrama del vehiculo,</text>
+<text xml:space="preserve" x="48" y="1381">NO inferir izquierda/derecha del conector.</text>
+<rect x="955" y="785" width="900" height="655" fill="none" stroke="#708090"/>
+<text x="973" y="818" class="head">4. MONITOR PCM / U2 PC817 + Q1</text>
+<text xml:space="preserve" x="973" y="853">PICO.GP18 (24) --+-- R3 330 -- U2.1 A</text>
+<text xml:space="preserve" x="973" y="875">                 |</text>
+<text xml:space="preserve" x="973" y="897">               R4 100k</text>
+<text xml:space="preserve" x="973" y="919">                 |</text>
+<text xml:space="preserve" x="973" y="941">GND -------------+----------- U2.2 K</text>
+<text xml:space="preserve" x="973" y="963"></text>
+<text xml:space="preserve" x="973" y="985">+5V ------------------------- U2.4 C</text>
+<text xml:space="preserve" x="973" y="1007">U2.3 E ----- R5 3.3k ---------+---- Q1.B</text>
+<text xml:space="preserve" x="973" y="1029">                              |</text>
+<text xml:space="preserve" x="973" y="1051">                            R6 47k</text>
+<text xml:space="preserve" x="973" y="1073">                              |</text>
+<text xml:space="preserve" x="973" y="1095">GND --------------------------+---- Q1.E</text>
+<text xml:space="preserve" x="973" y="1117">C1442.4 CMCVM --------------------- Q1.C</text>
+<text xml:space="preserve" x="973" y="1139"></text>
+<text xml:space="preserve" x="973" y="1161">Q1 = 2N5551 (NPN)</text>
+<text xml:space="preserve" x="973" y="1183">B = base; C = colector; E = emisor.</text>
+<text xml:space="preserve" x="973" y="1205">Confirmar orden fisico E/B/C segun fabricante.</text>
+<text xml:space="preserve" x="973" y="1227">No se asignan patas por la silueta TO-92.</text>
+<text xml:space="preserve" x="973" y="1249"></text>
+<text xml:space="preserve" x="973" y="1271">GP18 alto: Q1 lleva Monitor a GND.</text>
+<text xml:space="preserve" x="973" y="1293">GP18 bajo: Monitor queda liberado.</text>
+<text xml:space="preserve" x="973" y="1315">No alimentar C1442.4 desde +5V ni +3V3.</text>
+<text xml:space="preserve" x="973" y="1337">Capacidad y niveles de esta etapa pendientes</text>
+<text xml:space="preserve" x="973" y="1359">de verificar con la carga real de la PCM.</text>
+<text xml:space="preserve" x="973" y="1381">Monitor solo tras posicion abierta confirmada.</text>
+<rect x="30" y="1460" width="900" height="655" fill="none" stroke="#708090"/>
+<text x="48" y="1493" class="head">5. HALL SS49E / SENSOR EXTERNO</text>
+<text xml:space="preserve" x="48" y="1528">+3V3 -------------------------- SS49E.VCC</text>
+<text xml:space="preserve" x="48" y="1550">AGND (= GND) ------------------- SS49E.GND</text>
+<text xml:space="preserve" x="48" y="1572"></text>
+<text xml:space="preserve" x="48" y="1594">SS49E.OUT -- R7 1k --+--------- PICO.GP26 (31)</text>
+<text xml:space="preserve" x="48" y="1616">                     |                 |</text>
+<text xml:space="preserve" x="48" y="1638">                   R8 100k           C2 10nF</text>
+<text xml:space="preserve" x="48" y="1660">                     |                 |</text>
+<text xml:space="preserve" x="48" y="1682">AGND ----------------+-----------------+</text>
+<text xml:space="preserve" x="48" y="1704"></text>
+<text xml:space="preserve" x="48" y="1726">C3 100nF entre VCC y GND junto al SS49E.</text>
+<text xml:space="preserve" x="48" y="1748">Sensor frente a los imanes de la carcasa.</text>
+<text xml:space="preserve" x="48" y="1770">Confirmar pinout del SS49E real antes de soldar.</text>
+<text xml:space="preserve" x="48" y="1792">No conectar salida de Hall alimentado a 5V</text>
+<text xml:space="preserve" x="48" y="1814">al ADC de 3.3V.</text>
+<text xml:space="preserve" x="48" y="1836"></text>
+<text xml:space="preserve" x="48" y="1858">6. DIVISOR DE TENSION VM</text>
+<text xml:space="preserve" x="48" y="1880"></text>
+<text xml:space="preserve" x="48" y="1902">VM -- R9 100k 1% --+-- R11 1k --+-- GP28 (34)</text>
+<text xml:space="preserve" x="48" y="1924">                   |            |</text>
+<text xml:space="preserve" x="48" y="1946">                R10 22k 1%    C4 10nF</text>
+<text xml:space="preserve" x="48" y="1968">                   |            |</text>
+<text xml:space="preserve" x="48" y="1990">AGND --------------+------------+</text>
+<text xml:space="preserve" x="48" y="2012"></text>
+<text xml:space="preserve" x="48" y="2034">VM es salida del buck motor, NO bateria.</text>
+<text xml:space="preserve" x="48" y="2056">El divisor no es proteccion de transitorios.</text>
+<rect x="955" y="1460" width="900" height="655" fill="none" stroke="#708090"/>
+<text x="973" y="1493" class="head">7. LEDs / DESACOPLO / MONTAJE</text>
+<text xml:space="preserve" x="973" y="1528">GP16 (21) -- R12 1k -- LED1 VERDE A -&gt; K -- GND</text>
+<text xml:space="preserve" x="973" y="1550">GP17 (22) -- R13 1k -- LED2 ROJO  A -&gt; K -- GND</text>
+<text xml:space="preserve" x="973" y="1572"></text>
+<text xml:space="preserve" x="973" y="1594">A = anodo; K = catodo. LEDs indican comando.</text>
+<text xml:space="preserve" x="973" y="1616"></text>
+<text xml:space="preserve" x="973" y="1638">Conectar condensadores EN PARALELO a las redes:</text>
+<text xml:space="preserve" x="973" y="1660">  C5  100nF       VM    --||-- GND (driver)</text>
+<text xml:space="preserve" x="973" y="1682">  C6  470uF/25V   VM (+)--||-- GND (-)</text>
+<text xml:space="preserve" x="973" y="1704">  C7  100nF       +3V3  --||-- GND (driver)</text>
+<text xml:space="preserve" x="973" y="1726">  C8  10uF/10V    +3V3(+)||-- GND (-)</text>
+<text xml:space="preserve" x="973" y="1748">  C9  100nF       +5V   --||-- GND</text>
+<text xml:space="preserve" x="973" y="1770">  C10 100uF/10V   +5V(+) ||-- GND (-)</text>
+<text xml:space="preserve" x="973" y="1792">C1, C2, C3 y C4 estan en las secciones anteriores.</text>
+<text xml:space="preserve" x="973" y="1814">Revisar los condensadores presentes en modulos.</text>
+<text xml:space="preserve" x="973" y="1836"></text>
+<text xml:space="preserve" x="973" y="1858">PROTOBOARD: solo logica/senales; potencia externa.</text>
+<text xml:space="preserve" x="973" y="1880">PERFORADA: pads aislados, puentes soldados.</text>
+<text xml:space="preserve" x="973" y="1902">Misma conectividad electrica en ambos montajes.</text>
+<text xml:space="preserve" x="973" y="1924">Cruces no conectan salvo + / punto de union.</text>
+<text xml:space="preserve" x="973" y="1946">Etiquetas iguales representan LA MISMA RED.</text>
+<text xml:space="preserve" x="973" y="1968">Numeros entre () = pin fisico del Pico original.</text>
+<text xml:space="preserve" x="973" y="1990">Los nombres del TB6612 son pines del MODULO.</text>
+<text xml:space="preserve" x="973" y="2012">No son coordenadas de agujeros ni numero del IC.</text>
+<text xml:space="preserve" x="973" y="2034"></text>
+<text xml:space="preserve" x="973" y="2056">Sin sensor/corte por sobrecorriente.</text>
+<text xml:space="preserve" x="973" y="2078">PWM y timeout no limitan corriente instantanea.</text>
+<text x="35" y="2160">Base: ESQUEMA_FINAL.md. Pendientes: proteccion entrada/VM, calibracion mecanica y validacion de Monitor.</text></svg>

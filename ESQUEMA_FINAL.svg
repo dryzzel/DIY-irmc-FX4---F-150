@@ -1,0 +1,85 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="1150" viewBox="0 0 1500 1150">
+<defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto"><path d="M0,0 L9,3 L0,6 Z" fill="#334155"/></marker></defs>
+<rect width="1500" height="1150" fill="#f8fafc"/>
+<style>text{font-family:Arial,sans-serif;fill:#0f172a} .title{font-size:27px;font-weight:bold}.label{font-size:18px;font-weight:bold}.body{font-size:16px}.wire{fill:none;stroke:#334155;stroke-width:2;marker-end:url(#arrow)}</style>
+<text x="35" y="45" class="title">CMCV / IMRC - Pico + TB6612FNG paralelo + SS49E</text>
+<text x="35" y="76" class="body">Revision 2 simplificada para calibracion. Conexion detallada y limites: ESQUEMA_FINAL.md. No validado para instalacion permanente.</text>
+<rect x="35" y="110" width="245" height="190" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+<text x="50" y="138" class="label">C1442 / camioneta</text>
+<text x="50" y="164" class="body">1 VPWR</text>
+<text x="50" y="187" class="body">2 Tierra comun</text>
+<text x="50" y="210" class="body">3 CMCV comando</text>
+<text x="50" y="233" class="body">4 CMCVM Monitor</text>
+<rect x="345" y="110" width="330" height="110" rx="8" fill="#fff7ed" stroke="#94a3b8"/>
+<text x="360" y="138" class="label">Proteccion de alimentacion</text>
+<text x="360" y="164" class="body">Fusible + polaridad + transitorios</text>
+<text x="360" y="187" class="body">Dimensionado pendiente de medidas</text>
+<polyline points="280,160 345,160" class="wire"/>
+<rect x="750" y="110" width="310" height="110" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+<text x="765" y="138" class="label">Rama motor</text>
+<text x="765" y="164" class="body">LM2596 ajustado a 12 V</text>
+<text x="765" y="187" class="body">Salida directa a VM del driver</text>
+<polyline points="675,160 750,160" class="wire"/>
+<rect x="1130" y="110" width="330" height="110" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+<text x="1145" y="138" class="label">TB6612 VM</text>
+<text x="1145" y="164" class="body">100 nF + 470 uF / 25 V</text>
+<text x="1145" y="187" class="body">No exceder rango operativo</text>
+<polyline points="1060,160 1130,160" class="wire"/>
+<rect x="750" y="260" width="310" height="110" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+<text x="765" y="288" class="label">Rama logica</text>
+<text x="765" y="314" class="body">LM2596 5 V -&gt; SS14 -&gt; VSYS (39)</text>
+<text x="765" y="337" class="body">Pico 3V3 -&gt; VCC driver y sensores</text>
+<polyline points="700,160 700,315 750,315" class="wire"/>
+<rect x="35" y="405" width="420" height="155" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+<text x="50" y="433" class="label">Entrada PC817 #1</text>
+<text x="50" y="459" class="body">C1442-1 -&gt; 10k -&gt; opto pata 1</text>
+<text x="50" y="482" class="body">C1442-3 -&gt; opto pata 2</text>
+<text x="50" y="505" class="body">Opto 4 -&gt; GP15; opto 3 -&gt; GND</text>
+<text x="50" y="528" class="body">Diodo inverso: banda a 1; anodo a 2</text>
+<rect x="520" y="405" width="420" height="155" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+<text x="535" y="433" class="label">Pico / MicroPython</text>
+<text x="535" y="459" class="body">GP15 pull-up interno</text>
+<text x="535" y="482" class="body">GP16 verde; GP17 rojo (cada LED 1k)</text>
+<text x="535" y="505" class="body">GP26 Hall; GP27 libre; GP28 VM</text>
+<text x="535" y="528" class="body">GP18 controla Monitor</text>
+<polyline points="455,480 520,480" class="wire"/>
+<rect x="1005" y="405" width="455" height="155" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+<text x="1020" y="433" class="label">TB6612: un solo PWM</text>
+<text x="1020" y="459" class="body">GP2 -&gt; AIN1 + BIN1</text>
+<text x="1020" y="482" class="body">GP3 -&gt; AIN2 + BIN2</text>
+<text x="1020" y="505" class="body">GP4 -&gt; PWMA + PWMB</text>
+<text x="1020" y="528" class="body">GP5 -&gt; STBY; 10k de STBY a GND</text>
+<polyline points="940,480 1005,480" class="wire"/>
+<rect x="1005" y="605" width="455" height="110" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+<text x="1020" y="633" class="label">Motor RS-365SH</text>
+<text x="1020" y="659" class="body">AO1 + BO1 -&gt; M1</text>
+<text x="1020" y="682" class="body">AO2 + BO2 -&gt; M2; no conectar a GND</text>
+<polyline points="1230,560 1230,605" class="wire"/>
+<rect x="35" y="605" width="420" height="155" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+<text x="50" y="633" class="label">SS49E</text>
+<text x="50" y="659" class="body">VCC -&gt; 3V3 (36); GND -&gt; AGND (33)</text>
+<text x="50" y="682" class="body">OUT -&gt; 1k -&gt; GP26 (31)</text>
+<text x="50" y="705" class="body">GP26 -&gt; 100k y 10nF a AGND</text>
+<text x="50" y="728" class="body">100nF entre VCC y GND del Hall</text>
+<rect x="520" y="605" width="420" height="155" rx="8" fill="#ffffff" stroke="#94a3b8"/>
+<text x="535" y="633" class="label">Supervision de tension</text>
+<text x="535" y="659" class="body">Sin sensor ni corte de corriente</text>
+<text x="535" y="682" class="body">GP27 (32) sin conectar</text>
+<text x="535" y="705" class="body">VM -&gt; 100k/22k -&gt; 1k -&gt; GP28 (34)</text>
+<text x="535" y="728" class="body">PWM y timeout no limitan amperios</text>
+<rect x="35" y="805" width="690" height="165" rx="8" fill="#eff6ff" stroke="#94a3b8"/>
+<text x="50" y="833" class="label">Monitor: PC817 #2 + 2N5551</text>
+<text x="50" y="859" class="body">GP18 -&gt; 330 ohm -&gt; opto 1; opto 2 -&gt; GND; GP18 -&gt; 100k -&gt; GND</text>
+<text x="50" y="882" class="body">+5V_LOGICA -&gt; opto 4; opto 3 -&gt; 3.3k -&gt; base 2N5551</text>
+<text x="50" y="905" class="body">Base -&gt; 47k -&gt; GND; emisor -&gt; GND; colector -&gt; C1442-4</text>
+<text x="50" y="928" class="body">Validar con carga de banco y caracterizar PCM antes de habilitar</text>
+<rect x="770" y="805" width="690" height="165" rx="8" fill="#fff7ed" stroke="#94a3b8"/>
+<text x="785" y="833" class="label">Arranque y calibracion pendientes</text>
+<text x="785" y="859" class="body">DRIVE_ENABLED=False / MONITOR_ENABLED=False</text>
+<text x="785" y="882" class="body">Identificar OPEN_END y A_DIRECTION; medir recorrido</text>
+<text x="785" y="905" class="body">STBY bajo al arrancar, detener, invertir o fallar</text>
+<text x="785" y="928" class="body">Monitor solo con apertura confirmada y asentada</text>
+<text x="35" y="1020" class="label">TIERRA COMUN: C1442-2, LM2596, TB6612, Pico, Hall y Monitor. No hay aislamiento galvanico completo.</text>
+<text x="35" y="1052" class="body">Retorno de motor separado del retorno de sensores hasta el punto comun. Motor y potencia fuera de protoboard sin soldar.</text>
+<text x="35" y="1084" class="body">Sin corte por sobrecorriente. Protecciones de entrada/VM pendientes de dimensionar. No validado en vehiculo.</text>
+</svg>
