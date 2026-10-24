@@ -66,7 +66,7 @@
 <text x="38" y="1627" class="wire" xml:space="preserve">Conservar el orden de patas del sensor ya comprobado.</text>
 <text x="38" y="1651" class="wire" xml:space="preserve">No agregar la resistencia de 100k del esquema antiguo.</text>
 <text x="38" y="1675" class="wire" xml:space="preserve">A = Hall alto / cerrado. B = Hall bajo / abierto.</text>
-<text x="38" y="1699" class="wire" xml:space="preserve">Montaje actual: sentido 1 abre B; sentido 2 cierra A.</text>
+<text x="38" y="1699" class="wire" xml:space="preserve">Montaje actual: sentido 1 cierra A; sentido 2 abre B.</text>
 <rect x="20" y="1746" width="1140" height="545" rx="8" fill="#f4f7fa" stroke="#7890a5"/>
 <text x="38" y="1776" class="head">4. COMANDO PCM: PC817 Y DIODO ANTIPARALELO</text>
 <text x="38" y="1806" class="wire" xml:space="preserve">C1442.1 VPWR ----[10k / 1/4 W]----+---- PC817 pata 1 (anodo)</text>

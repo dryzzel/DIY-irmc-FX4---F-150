@@ -76,7 +76,7 @@ Si motor y Hall comparten recorrido, usar pares separados.
 Conservar el orden de patas del sensor ya comprobado.
 No agregar la resistencia de 100k del esquema antiguo.
 A = Hall alto / cerrado. B = Hall bajo / abierto.
-Montaje actual: sentido 1 abre B; sentido 2 cierra A.
+Montaje actual: sentido 1 cierra A; sentido 2 abre B.
 ```
 
 ## 4. COMANDO PCM: PC817 Y DIODO ANTIPARALELO
@@ -134,6 +134,6 @@ Sin corte por sobrecorriente: PWM/timeout no limitan corriente.
 - No aumentar los valores de tension de los bucks para compensar caidas. Verificar VM bajo carga. El LM2596 es reductor, no elevador.
 - No se agrega el pull-down de 100k al Hall del esquema anterior: las capturas actuales corresponden a resistencia serie de 1k, 103 a AGND y 104 de alimentacion.
 - Mantener desacoplo local en el driver; verificar lo que ya incluye el modulo antes de duplicar componentes. El 470uF/35V se propone en VM, no como supresor de transitorios en la entrada de camioneta.
-- `prueba_tb6612.py` sigue siendo manual de banco. La opcion `a` usa umbrales A=40000/B=26000, freno de 50 ms y direccion A=-1. `main.py` aun detiene en rueda libre, requiere divisor VM y configuracion final; DRIVE_ENABLED sigue False. Este plano no habilita un arranque autonomo.
+- `prueba_tb6612.py` sigue siendo manual de banco. La opcion `a` usa umbrales A=40000/B=26000, freno de 50 ms y direccion A=1. `main.py` aun detiene en rueda libre, requiere divisor VM y configuracion final; DRIVE_ENABLED sigue False. Este plano no habilita un arranque autonomo.
 
 Referencias: [Pico, alimentacion VSYS y USB](https://datasheets.raspberrypi.com/pico/pico-datasheet.pdf), [TI LM2596](https://www.ti.com/lit/ds/symlink/lm2596.pdf), [supresion de ruido del motor](https://www.pololu.com/docs/0J15/9).

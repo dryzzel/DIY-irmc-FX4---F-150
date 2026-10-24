@@ -78,8 +78,8 @@ inmediatamente despues segun la entrada inicial:
 
 | Entrada | Destino |
 |---|---|
-| PC817 encendido / GP15=0 | A cerrado, sentido 2 |
-| PC817 apagado / GP15=1 | B abierto, sentido 1 |
+| PC817 encendido / GP15=0 | A cerrado, sentido 1 |
+| PC817 apagado / GP15=1 | B abierto, sentido 2 |
 
 Se usa el controlador con umbrales 40000/35000 y 26000/31300, PWM 25%-60%,
 timeout provisional 2000 ms, filtro de entrada y pausa de inversion. Al alcanzar
@@ -96,8 +96,8 @@ No sustituye la validacion posterior con la carga de valvulas de la camioneta.
 
 ## Dos imanes y medicion despues de parar: opcion r
 
-Direccion confirmada tras el montaje permanente: 1 abre hacia B, 2 cierra hacia A.
-Las pruebas a y r usan DIRECCION_A = -1. Verificar t en sentido 2 desde centro
+Cables del motor invertidos al soldar: ahora 1 cierra hacia A, 2 abre hacia B. Validar con t.
+Las pruebas a y r usan DIRECCION_A = 1. Verificar t en sentido 1 desde centro
 antes de repetir r: debe cortar en A alto. config.py conserva DRIVE_ENABLED=False.
 La opcion r no pide palabras: al elegirla hay 3 s de cuenta regresiva y arranca
 si el Hall inicial permanece estable. Mantener manos fuera de la mecanica.

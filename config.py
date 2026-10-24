@@ -2,7 +2,7 @@
 DRIVE_ENABLED = False
 MONITOR_ENABLED = False
 OPEN_END = 'B'  # Confirmado mecanicamente: bajo = abierto.
-A_DIRECTION = -1  # Montaje actual: IN1=0/IN2=1 hacia A cerrado.
+A_DIRECTION = 1  # Cables invertidos al soldar: IN1=1/IN2=0 hacia A cerrado.
 MOTION_TIMEOUT_MS = None  # Recorrido medido con margen, en milisegundos.
 HALL_A_ENTER = 35150
 HALL_A_EXIT = 34150

@@ -20,7 +20,7 @@ GIRO_MS = 2000
 RAMPA_GIRO_MS = 200
 TOPE_A = 40000  # Alto: cerrado. Umbral provisional de las capturas del usuario.
 TOPE_B = 26000  # Bajo: abierto.
-DIRECCION_A = -1  # Montaje actual: sentido 2 cierra A; sentido 1 abre B.
+DIRECCION_A = 1  # Cables del motor invertidos al soldar: sentido 1 cierra A; 2 abre B.
 CENTRO_MIN = 30000
 CENTRO_MAX = 34000
 TOPE_TIMEOUT_MS = 1000  # Recorrido previo incompleto a 500 ms; no limita corriente.
@@ -406,7 +406,7 @@ def probar_recorrido():
     monitor.off()
     sensor = ADC(26)
     informe = {'version': 1, 'completo': False, 'tramos': []}
-    print('RECORRIDO DOS IMANES: sentido 1 abre B; sentido 2 cierra A.')
+    print('RECORRIDO DOS IMANES: sentido 1 cierra A; sentido 2 abre B.')
     print('Motor acoplado, Hall instalado. Retirar manos. Ctrl+C cancela.')
     print('PWM 25% -> 60%; maximo provisional', RECORRIDO_TIMEOUT_MS, 'ms por tramo.')
     print('Freno electrico', FRENO_MS, 'ms, luego rueda libre; mediciones desde inicio del freno.')
