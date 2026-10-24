@@ -27,30 +27,41 @@ def configuracion():
     c.VM_MONITOR_ENABLED = False
     c.OPEN_END = 'B'
     c.A_DIRECTION = hw.DIRECCION_A
-    c.MOTION_TIMEOUT_MS = 2000
+    c.MOTION_TIMEOUT_MS = 3000
     c.HALL_A_ENTER, c.HALL_A_EXIT = hw.TOPE_A, hw.RETENCION_A
     c.HALL_B_ENTER, c.HALL_B_EXIT = hw.TOPE_B, hw.RETENCION_B
     c.PWM_START, c.PWM_RUN = hw.PWM_INICIAL, hw.PWM_FINAL
+    c.RAMP_MS = 20  # Rampa corta: 25% -> 60% en 20 ms.
     return c
 
 
 class Registro:
+    RESERVA_FIN = 1024
+
     def __init__(self):
         if DIRECTORIO not in os.listdir():
             os.mkdir(DIRECTORIO)
-        names = os.listdir(DIRECTORIO)
+        self.pending = []
+        self.size = 0
+        self.heartbeat = None
         self.path = None
+        self._nuevo()
+
+    def _nuevo(self):
+        names = os.listdir(DIRECTORIO)
         for n in range(1, MAX_ARCHIVOS + 1):
             name = 'prueba_%02d.jsonl' % n
             if name not in names:
-                self.path = DIRECTORIO + '/' + name
-                break
-        if self.path is None:
-            raise OSError('REGISTROS_LLENO: descargar y borrar registros anteriores')
-        self.pending = []
-        self.size = 0
-        with open(self.path, 'w') as f:
-            f.write('')
+                path = DIRECTORIO + '/' + name
+                with open(path, 'w') as f:
+                    f.write('')
+                self.path, self.size = path, 0
+                return
+        raise OSError('REGISTROS_LLENO: descargar y borrar registros anteriores')
+
+    def _latido(self):
+        if self.heartbeat:
+            self.heartbeat()
 
     def add(self, event):
         if len(self.pending) >= MAX_PENDIENTES:
@@ -58,18 +69,54 @@ class Registro:
         self.pending.append(event)
 
     def flush(self):
-        # Llamar SOLO con STBY=0, sin movimiento ni freno.
-        with open(self.path, 'a') as f:
+        # Solo STBY=0. Escrituras por lotes, con latido entre lineas.
+        if not self.pending:
+            return
+        f = None
+        try:
             while self.pending:
-                line = json.dumps(self.pending[0]) + '\n'
-                if self.size + len(line) > MAX_BYTES:
-                    raise OSError('REGISTRO_LLENO')
+                event = self.pending[0]
+                line = json.dumps(event) + '\n'
+                terminal = event.get('evento') == 'FIN'
+                limit = MAX_BYTES if terminal else MAX_BYTES - self.RESERVA_FIN
+                if len(line) > limit:
+                    raise OSError('LINEA_REGISTRO_DEMASIADO_GRANDE')
+                if self.size + len(line) > limit:
+                    if f is not None:
+                        f.flush()
+                        f.close()
+                        f = None
+                    self._latido()
+                    previous = self.path
+                    self._nuevo()
+                    self.pending.insert(0, {'evento': 'CONTINUACION',
+                                           'anterior': previous, 'ms': event.get('ms')})
+                    continue
+                if f is None:
+                    f = open(self.path, 'a')
                 f.write(line)
                 self.size += len(line)
                 self.pending.pop(0)
+                self._latido()
             f.flush()
+            self._latido()
+        finally:
+            if f is not None:
+                f.close()
         if hasattr(os, 'sync'):
             os.sync()
+        self._latido()
+
+    def finish(self, event):
+        # Un error de capacidad no debe impedir registrar por que se detuvo.
+        try:
+            self.flush()
+        except OSError as error:
+            event['error_registro'] = str(error)[:200]
+            event['pendientes_descartados'] = len(self.pending)
+            self.pending = []
+        self.add(event)
+        self.flush()
 
 
 def ejecutar():
@@ -86,9 +133,10 @@ def ejecutar():
         control = Controller(c)
         log = Registro()
         reset = machine.reset_cause()
-        log.add({'evento': 'INICIO', 'version': 1, 'ms': 0, 'reset': reset,
+        log.add({'evento': 'INICIO', 'version': 3, 'ms': 0, 'reset': reset,
                  'direccion_A': c.A_DIRECTION, 'open_end': c.OPEN_END,
-                 'pwm': c.PWM_RUN, 'freno_ms': hw.FRENO_MS,
+                 'pwm': c.PWM_RUN, 'pwm_inicial': c.PWM_START,
+                 'rampa_ms': c.RAMP_MS, 'freno_ms': hw.FRENO_MS,
                  'umbral_A': c.HALL_A_ENTER, 'umbral_B': c.HALL_B_ENTER,
                  'retencion_A': c.HALL_A_EXIT, 'retencion_B': c.HALL_B_EXIT,
                  'timeout_ms': c.MOTION_TIMEOUT_MS, 'monitor': False,
@@ -99,6 +147,11 @@ def ejecutar():
         if control.errors:
             raise ValueError('CONFIG: ' + ', '.join(control.errors))
         watchdog = machine.WDT(timeout=1000)
+        def latido_registro():
+            if hw.standby.value():
+                raise ValueError('ESCRITURA_CON_DRIVER_ACTIVO')
+            watchdog.feed()
+        log.heartbeat = latido_registro
         hw.pwm.freq(c.PWM_HZ)
         sensor = machine.ADC(26)
         start = ticks_ms()
@@ -172,9 +225,14 @@ def ejecutar():
                 last_sample, last_state = now, state
             if out['fault']:
                 raise ValueError(out['fault'])
-            if (not active and brake is None and out['state'] == 'DETENIDO'
-                    and now - last_power >= 800
-                    and (recent or now - last_flush >= 1000)):
+            # Vaciar preventivamente durante pausas: las ordenes frecuentes
+            # pueden impedir que exista una ventana de 800 ms en DETENIDO.
+            urgente = len(log.pending) >= 64
+            reposo = (out['state'] == 'DETENIDO' and now - last_power >= 800
+                      and now - last_flush >= 1000)
+            if (not active and brake is None and now - last_power >= 50
+                    and out['state'] in ('PAUSA', 'ASENTANDO', 'DETENIDO')
+                    and (urgente or reposo)):
                 hw.parar()
                 watchdog.feed()
                 log.flush()
@@ -193,13 +251,9 @@ def ejecutar():
         red.on()
         if log is not None:
             try:
-                # Priorizar guardar el error aun si el buffer se lleno.
-                if len(log.pending) >= MAX_PENDIENTES:
-                    log.pending.pop()
-                log.add({'evento': 'FIN', 'ms': now, 'motivo': reason})
                 if watchdog:
                     watchdog.feed()
-                log.flush()
+                log.finish({'evento': 'FIN', 'ms': now, 'motivo': reason})
             except Exception as error:
                 print('Error guardando registro:', error)
         print('Prueba detenida:', reason, '| archivo:', log.path if log else None)

@@ -10,6 +10,8 @@ from unittest.mock import patch
 class VehicleTests(unittest.TestCase):
     def simulate(self, mode='normal'):
         clock = [0]
+        plant_hall = [45000]
+        duration = 30000 if mode == "rapid" else 4500
         pins = {}
         events = []
         class Pin:
@@ -22,6 +24,7 @@ class VehicleTests(unittest.TestCase):
                     self.level = int(value)
                     events.append((clock[0], self.n, self.level))
                 if self.n == 15:
+                    if mode == "rapid": return (clock[0] // 1100) % 2
                     return int(clock[0] >= 2200) if mode == 'normal' else 0
                 return self.level
             def on(self): self.value(1)
@@ -29,6 +32,10 @@ class VehicleTests(unittest.TestCase):
         class ADC:
             def __init__(self, n): pass
             def read_u16(self):
+                if mode == 'rapid':
+                    if pins[5].level and pins[2].level != pins[3].level:
+                        plant_hall[0] += 10 if pins[2].level else -10
+                    return plant_hall[0]
                 if mode == 'hall_error' and clock[0] >= 950: return 65535
                 if mode == 'timeout': return 32000
                 if clock[0] < 1000: return 32000
@@ -41,7 +48,7 @@ class VehicleTests(unittest.TestCase):
             def feed(self): pass
         def sleep(ms):
             clock[0] += ms
-            if clock[0] >= 4700: raise KeyboardInterrupt
+            if clock[0] >= duration + 200: raise KeyboardInterrupt
         hw = types.SimpleNamespace(DIRECCION_A=1, TOPE_A=40000, TOPE_B=26000,
             RETENCION_A=35000, RETENCION_B=31300, PWM_INICIAL=.25, PWM_FINAL=.60,
             FRENO_MS=50, HALL_LOOP_MS=1, pwm=PWM(), standby=Pin(5),
@@ -63,7 +70,7 @@ class VehicleTests(unittest.TestCase):
                 spec.loader.exec_module(module)
                 module.DIRECTORIO = folder
                 module.ARRANQUE_MS = 0
-                module.DURACION_MS = 4500
+                module.DURACION_MS = duration
                 # Registro accepts a directory name; use an existing relative temp subfolder.
                 old = os.getcwd()
                 os.chdir(folder)
@@ -77,7 +84,7 @@ class VehicleTests(unittest.TestCase):
                     with patch.object(module.Registro, 'flush', checked_flush):
                         with self.assertRaises(KeyboardInterrupt): module.ejecutar()
                     rows = []
-                    for name in os.listdir('logs'):
+                    for name in sorted(os.listdir('logs')):
                         with open('logs/' + name) as f:
                             rows += [json.loads(line) for line in f if line.strip()]
                 finally:
@@ -88,11 +95,22 @@ class VehicleTests(unittest.TestCase):
 
     def test_both_directions_brake_and_safe_flush(self):
         rows, events = self.simulate()
+        self.assertEqual(rows[0]['rampa_ms'], 20)
         states = [r for r in rows if r['evento'] == 'ESTADO']
+        moving = [r for r in states if r['direccion']]
+        self.assertEqual(moving[0]['pwm'], .25)
+        self.assertEqual(moving[1]['pwm'], .60)
         self.assertEqual({r['direccion'] for r in states}, {-1, 0, 1})
         self.assertTrue(any(r['frenando'] for r in states))
         self.assertEqual({r['posicion'] for r in states if r['estado']=='DETENIDO'}, {'A','B'})
         self.assertEqual(rows[-1]['motivo'], 'FIN_TIEMPO')
+
+    def test_rapid_commands_do_not_starve_logging(self):
+        rows, events = self.simulate('rapid')
+        self.assertEqual(rows[-1]['motivo'], 'FIN_TIEMPO')
+        self.assertGreater(len(rows), 256)
+        self.assertGreater(sum(r.get('estado') == 'DETENIDO' for r in rows), 10)
+        self.assertFalse(any(r.get('fallo') for r in rows))
 
     def test_saturation_stops_and_records(self):
         rows, _ = self.simulate('hall_error')
@@ -101,6 +119,10 @@ class VehicleTests(unittest.TestCase):
     def test_timeout_latches(self):
         rows, events = self.simulate('timeout')
         self.assertEqual(rows[-1]['motivo'], 'TIMEOUT')
+        self.assertEqual(rows[0]['timeout_ms'], 3000)
+        start = next(r['ms'] for r in rows if r.get('direccion'))
+        self.assertGreaterEqual(rows[-1]['ms'] - start, 3000)
+        self.assertLess(rows[-1]['ms'] - start, 3020)
         cutoff = rows[-1]['ms']
         self.assertFalse(any(t >= cutoff and n == 5 and v for t,n,v in events))
 

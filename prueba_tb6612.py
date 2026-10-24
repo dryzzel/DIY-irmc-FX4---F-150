@@ -357,10 +357,15 @@ def observar_parada(sensor, destino, corte, instante_corte, frenando=False):
             'retenido': retenido, 'hall_final': puntos[-1]['hall']}
 
 
-def tramo_hall(sensor, destino):
+def tramo_hall(sensor, destino, diagnostico=None):
     parar()
     sleep_ms(PAUSA_MS)
     inicial = leer_hall_tope(sensor)
+    if diagnostico is not None:
+        diagnostico.update({'destino': destino, 'hall_inicial': inicial,
+                           'min': 65535, 'max': 0, 'crudo_min': 65535,
+                           'crudo_max': 0, 'lecturas': 0,
+                           'ultimo_ms': None, 'intervalo_max_ms': 0, 'curva': []})
     if extremo_hall(inicial) == destino:
         raise ValueError('Ya esta en destino; no se inicia ese tramo')
     direccion = DIRECCION_A if destino == 'A' else -DIRECCION_A
@@ -371,12 +376,16 @@ def tramo_hall(sensor, destino):
     max_intervalo = 0
     try:
         while True:
-            valor = leer_hall_tope(sensor)
+            valor = leer_hall_tope(sensor, diagnostico)
             lectura_tick = ticks_ms()
             if ultima_lectura is not None:
                 max_intervalo = max(max_intervalo, ticks_diff(lectura_tick, ultima_lectura))
             ultima_lectura = lectura_tick
             tiempo = ticks_diff(ticks_ms(), inicio)
+            if diagnostico is not None:
+                curva = diagnostico['curva']
+                if not curva or tiempo - curva[-1]['ms'] >= 25:
+                    curva.append({'ms': tiempo, 'hall': valor})
             llegado = extremo_hall(valor) == destino
             if llegado or tiempo >= RECORRIDO_TIMEOUT_MS:
                 parar()
@@ -401,11 +410,18 @@ def tramo_hall(sensor, destino):
             'parada': parada}
 
 
-def probar_recorrido():
+def probar_recorrido(aprendizaje=False):
     parar()
     monitor.off()
     sensor = ADC(26)
     informe = {'version': 1, 'completo': False, 'tramos': []}
+    if aprendizaje:
+        informe.update({'tipo': 'aprendizaje_con_movimiento',
+                        'validado_para_control': False, 'capturas': {}, 'diagnosticos': [],
+                        'direccion_A': DIRECCION_A, 'pwm': PWM_FINAL,
+                        'umbral_A': TOPE_A, 'umbral_B': TOPE_B, 'freno_ms': FRENO_MS})
+        print('APRENDIZAJE DINAMICO: colocar en CENTRO con VM apagada antes de empezar.')
+        print('Usa los limites actuales; no busca topes ni cambia umbrales automaticamente.')
     print('RECORRIDO DOS IMANES: sentido 1 cierra A; sentido 2 abre B.')
     print('Motor acoplado, Hall instalado. Retirar manos. Ctrl+C cancela.')
     print('PWM 25% -> 60%; maximo provisional', RECORRIDO_TIMEOUT_MS, 'ms por tramo.')
@@ -414,7 +430,10 @@ def probar_recorrido():
         for segundo in (3, 2, 1):
             print('Inicio en', segundo, 's')
             sleep_ms(1000)
-        posicion = posicion_retenida(leer_hall_tope(sensor))
+        valor_inicial = leer_hall_tope(sensor)
+        if aprendizaje and not CENTRO_MIN <= valor_inicial <= CENTRO_MAX:
+            raise ValueError('Aprendizaje requiere centro: no mover automaticamente desde aqui')
+        posicion = posicion_retenida(valor_inicial)
         if posicion == 'INDEFINIDA':
             raise ValueError('Posicion inicial ambigua: colocar en centro con potencia quitada')
         # Verificar posicion inicial estable, sin mover.
@@ -422,10 +441,19 @@ def probar_recorrido():
             sleep_ms(10)
             if posicion_retenida(leer_hall_tope(sensor)) != posicion:
                 raise ValueError('Hall inicial inestable; no arrancar')
+        if aprendizaje:
+            captura = capturar_hall(sensor)
+            informe['capturas']['centro'] = captura
+            if not CENTRO_MIN <= captura['crudo_min'] <= captura['crudo_max'] <= CENTRO_MAX:
+                raise ValueError('Centro fuera de rango o inestable; no iniciar')
         ruta = ('B', 'A') if posicion == 'A' else ('A', 'B')
         print('Ruta:', ruta, '| inicio:', posicion)
         for destino in ruta:
-            resultado = tramo_hall(sensor, destino)
+            diagnostico = None
+            if aprendizaje:
+                diagnostico = {}
+                informe['diagnosticos'].append(diagnostico)
+            resultado = tramo_hall(sensor, destino, diagnostico)
             informe['tramos'].append(resultado)
             print('\nDestino:', destino, 'CERRADO' if destino == 'A' else 'ABIERTO')
             print('Inicio Hall:', resultado['hall_inicial'], '| corte:', resultado['hall_corte'],
@@ -437,6 +465,15 @@ def probar_recorrido():
                 raise ValueError('TIMEOUT: se cancela el resto de la ruta, sin reintento')
             if not resultado['parada']['retenido']:
                 raise ValueError('Hall salio de la zona del extremo tras corte; no continuar')
+            if aprendizaje:
+                # Motor ya apagado; referencia estatica en el mismo punto alcanzado.
+                captura = capturar_hall(sensor)
+                informe['capturas'][destino] = captura
+                if captura['crudo_min'] <= 2000 or captura['crudo_max'] >= 63500:
+                    raise ValueError('Hall fuera de rango durante captura final')
+                if ((destino == 'A' and captura['min'] < RETENCION_A)
+                        or (destino == 'B' and captura['max'] > RETENCION_B)):
+                    raise ValueError('Posicion perdida durante captura final')
         informe['completo'] = True
         print('Dos destinos medidos. No se repite el ciclo automaticamente.')
     except (ValueError, OSError) as error:
@@ -453,9 +490,10 @@ def probar_recorrido():
     # Guardar solo con motor deshabilitado. No cambia config.py.
     import json
     try:
-        with open('hall_recorrido.json', 'w') as archivo:
+        nombre = 'hall_dinamico.json' if aprendizaje else 'hall_recorrido.json'
+        with open(nombre, 'w') as archivo:
             json.dump(informe, archivo)
-        print('Registro guardado en hall_recorrido.json (reemplaza el anterior).')
+        print('Registro guardado en', nombre, '(reemplaza el anterior).')
     except OSError as error:
         print('No se pudo guardar; conservar la salida de consola:', error)
 
@@ -578,7 +616,7 @@ def main():
         print('PRUEBA MANUAL TB6612: motor libre, sin llegar a topes.')
         print('Pulsos de', PULSO_MS, 'ms. PWM 25% -> 60%. Sin control de corriente.')
         while True:
-            print('\na: automatico PC817 + Hall | 1/2: pulsos SIN HALL | g: giro SIN HALL | t: direccion con topes Hall | r: dos imanes + mediciones | h: aprender Hall | s: PC817 | c: medir SIN MOTOR | 0: salir')
+            print('\na: automatico PC817 + Hall | 1/2: pulsos SIN HALL | g: giro SIN HALL | t: direccion con topes Hall | r: dos imanes + mediciones | l: aprendizaje con movimiento | h: aprender Hall | s: PC817 | c: medir SIN MOTOR | 0: salir')
             opcion = input('Opcion: ').strip().lower()
             if opcion in ('1', '2'):
                 pulso(int(opcion))
@@ -593,6 +631,8 @@ def main():
                 probar_topes()
             elif opcion == 'r':
                 probar_recorrido()
+            elif opcion == 'l':
+                probar_recorrido(aprendizaje=True)
             elif opcion == 'a':
                 probar_automatico()
             elif opcion == 'c':

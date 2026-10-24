@@ -27,8 +27,9 @@ Mientras programes por USB, desconecta fisicamente el cable de 5 V externo de VS
 | A / B entrada | 40000 / 26000 |
 | Retencion A / B | 35000 / 31300 |
 | PWM inicial / final | 25 % / 60 % |
+| Rampa de arranque | 20 ms |
 | Freno | 50 ms, luego rueda libre |
-| Timeout de marcha acumulada | 2000 ms |
+| Timeout de marcha acumulada | 3000 ms |
 | Espera inicial | 5 segundos, luego estabilizacion del controlador |
 | Duracion maxima | 10 minutos desde fin de espera inicial |
 | Monitor y lectura VM | Deshabilitados |
@@ -75,11 +76,11 @@ Conservar diodo antiparalelo del PC817 y filtros Hall/motor del esquema de cable
 - Ambos apagados brevemente: comando en estabilizacion.
 - Rojo parpadeando: prueba detenida por fallo, limite de tiempo o cancelacion. Consultar evento FIN; no equivale necesariamente a averia.
 
-Los LED indican comando, no confirman por si solos posicion. Un fallo de registro tambien detiene movimiento.
+Los LED indican comando, no confirman por si solos posicion. Un fallo real de registro o agotamiento de los ocho archivos detiene movimiento; llenar un fragmento individual ya no lo detiene.
 
 ## Archivos y datos
 
-Cada arranque reserva un archivo distinto: `logs_cmcv/prueba_01.jsonl` a `prueba_08.jsonl`. No se borran ni sobrescriben archivos anteriores. Maximo 128 KiB por archivo. Si se llena el limite, descargar y borrar manualmente los registros antes de otra prueba.
+Revision 2: cada arranque reserva un archivo distinto: `logs_cmcv/prueba_01.jsonl` a `prueba_08.jsonl`. No se borran ni sobrescriben archivos anteriores. Maximo 128 KiB por archivo, con 1 KiB reservado para el evento FIN. Al llenarse un fragmento, continua en el siguiente archivo libre con evento CONTINUACION y referencia al anterior; compartir todos los fragmentos. Si se ocupan los ocho archivos, detiene el motor y guarda FIN con REGISTROS_LLENO, indicando cuantos eventos pendientes no pudo guardar. Descargar y borrar manualmente los registros antes de otra prueba; no se borran automaticamente.
 
 Cada linea es un objeto JSON independiente, no un unico JSON con todo el ensayo:
 
@@ -89,9 +90,11 @@ Cada linea es un objeto JSON independiente, no un unico JSON con todo el ensayo:
 
 Los estados se acumulan en RAM (maximo 256) durante marcha/frenado. Se muestrea para el registro cada 50 ms durante movimiento y asentamiento, cada 5 s en reposo y cuando cambia el estado/comando. El control sigue leyendo cada ~1 ms mas el tiempo de ejecucion; ese intervalo no esta garantizado.
 
-Se escribe flash SOLO con STBY apagado y estando DETENIDO al menos 800 ms despues de la ultima activacion, o despues de apagar por fallo/fin. Durante esa escritura no se lee la PCM; cualquier cambio se detecta en la siguiente vuelta. El buffer lleno provoca parada, no perdida silenciosa de datos.
+Revision 3: se escribe flash SOLO con STBY apagado, sin freno activo. El guardado normal ocurre en DETENIDO despues de 800 ms. Si se acumulan 64 registros, se permite guardar en PAUSA, ASENTANDO o DETENIDO tras al menos 50 ms sin potencia, para que los cambios frecuentes de comando no llenen el buffer. Tambien guarda despues de apagar por fallo/fin. Durante esa escritura no se lee la PCM; cualquier cambio se detecta en la siguiente vuelta. El buffer lleno provoca parada, no perdida silenciosa de datos.
 
 No se garantiza conservar el ultimo tramo ante corte brusco de alimentacion: la RAM se pierde y una escritura puede quedar incompleta. Las lineas completas anteriores son las recuperables. Ausencia de FIN significa finalizacion no registrada, no exito.
+
+Durante la escritura, solo con STBY=0, se alimenta el watchdog entre lineas y operaciones de guardado. Una operacion individual que se bloquee mas de un segundo todavia puede provocar un reinicio.
 
 Watchdog de 1 segundo: si el programa se bloquea, reinicia. Un arranque identificado como RESET_WATCHDOG queda sin movimiento, no reintenta. No es un limitador de corriente ni un freno inmediato. Revisar el registro antes de reiniciar; desconectar/reconectar alimentacion inicia una nueva prueba. Tras finalizar, el programa mantiene potencia apagada y alimenta el watchdog; Ctrl+C vuelve al editor pero el watchdog sigue activo y puede reiniciar despues. Para recuperar archivos trabajar con VM desconectada.
 
@@ -102,3 +105,7 @@ No existe supervision de corriente, ni proteccion de atasco por hardware, ni Mon
 Tests simulados verifican ambas direcciones y freno, que no se escribe con STBY habilitado, parada por saturacion Hall, timeout bloqueado, fallo de escritura y bloqueo tras reinicio watchdog. No sustituyen la prueba en Pico ni validan potencia/temperatura/transitorios.
 
 Referencia: [MicroPython WDT](https://docs.micropython.org/en/latest/library/machine.WDT.html).
+
+Revision 2 corrige la parada por limite de archivo observada en prueba_08.jsonl (130902 bytes, siguiente linea excedia 131072). Los archivos 06 y 07 solo registran bloqueo de arranque por watchdog; no prueban por si solos que la escritura originara esos reinicios. El watchdog y los limites del motor se conservan.
+
+Revision 3: corregido BUFFER_LLENO observado a los 20462 ms. Una simulacion con cambios de comando cada 1100 ms reprodujo el fallo anterior; ahora guarda durante las pausas sin habilitar escritura con el driver activo. Se mantienen los limites de motor y el watchdog.

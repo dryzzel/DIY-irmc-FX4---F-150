@@ -1,3 +1,13 @@
+## Opcion l: aprendizaje con movimiento
+
+Usar la letra l minuscula. Con VM quitada, colocar una sola vez el mecanismo en centro; despues restablecer VM y retirar las manos. Cuenta regresiva de 3 segundos. Captura centro durante 2 segundos, recorre A y B con los umbrales existentes y captura cada extremo durante 2 segundos con motor apagado, sin moverlo a mano.
+
+Guarda hall_dinamico.json en el Pico: centro y extremos, curva cada 25 ms durante marcha, min/max crudos y promediados, tiempo, freno y observacion tras parada. Guarda solo con potencia deshabilitada. Sobrescribe el archivo dinamico anterior, no hall_aprendizaje.json ni config.py. Un fallo conserva los diagnosticos acumulados y cancela los tramos restantes.
+
+No es una busqueda de topes fisicos ni una calibracion desde cero: conserva A>=40000, B<=26000, PWM actual, freno 50 ms y timeout de recorrido 2500 ms. No sube potencia ni ensancha limites. No aplica umbrales nuevos automaticamente (validado_para_control=false); revisar datos antes de ajustar. Si el motor no llega al iman con estos limites, informa el fallo en vez de seguir girando. Usar con la fuente y actuador libre en esta fase.
+
+Si hay un main.py autonomo instalado, detenerlo primero desde Thonny con VM apagada. Ejecutar prueba_tb6612.py desde el editor; no ejecutar simultaneamente el automatico y el aprendizaje.
+
 # Prueba manual de giro con TB6612FNG
 
 ## Diagnostico actual tras remontaje / timeout de r
