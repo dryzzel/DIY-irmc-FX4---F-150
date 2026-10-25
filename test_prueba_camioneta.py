@@ -24,6 +24,7 @@ class VehicleTests(unittest.TestCase):
                     self.level = int(value)
                     events.append((clock[0], self.n, self.level))
                 if self.n == 15:
+                    if mode == "unstable_start": return (clock[0] // 2) % 2
                     if mode == "rapid": return (clock[0] // 1100) % 2
                     return int(clock[0] >= 2200) if mode == 'normal' else 0
                 return self.level
@@ -111,6 +112,12 @@ class VehicleTests(unittest.TestCase):
         self.assertGreater(len(rows), 256)
         self.assertGreater(sum(r.get('estado') == 'DETENIDO' for r in rows), 10)
         self.assertFalse(any(r.get('fallo') for r in rows))
+
+    def test_unstable_input_at_start_does_not_fill_buffer(self):
+        rows, events = self.simulate('unstable_start')
+        self.assertEqual(rows[-1]['motivo'], 'FIN_TIEMPO')
+        self.assertGreater(len(rows), 256)
+        self.assertFalse(any(n == 5 and v for _, n, v in events))
 
     def test_saturation_stops_and_records(self):
         rows, _ = self.simulate('hall_error')

@@ -133,7 +133,7 @@ def ejecutar():
         control = Controller(c)
         log = Registro()
         reset = machine.reset_cause()
-        log.add({'evento': 'INICIO', 'version': 3, 'ms': 0, 'reset': reset,
+        log.add({'evento': 'INICIO', 'version': 4, 'ms': 0, 'reset': reset,
                  'direccion_A': c.A_DIRECTION, 'open_end': c.OPEN_END,
                  'pwm': c.PWM_RUN, 'pwm_inicial': c.PWM_START,
                  'rampa_ms': c.RAMP_MS, 'freno_ms': hw.FRENO_MS,
@@ -231,7 +231,7 @@ def ejecutar():
             reposo = (out['state'] == 'DETENIDO' and now - last_power >= 800
                       and now - last_flush >= 1000)
             if (not active and brake is None and now - last_power >= 50
-                    and out['state'] in ('PAUSA', 'ASENTANDO', 'DETENIDO')
+                    and out['state'] in ('INICIO', 'PAUSA', 'ASENTANDO', 'DETENIDO')
                     and (urgente or reposo)):
                 hw.parar()
                 watchdog.feed()

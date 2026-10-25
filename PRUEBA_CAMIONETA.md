@@ -90,7 +90,7 @@ Cada linea es un objeto JSON independiente, no un unico JSON con todo el ensayo:
 
 Los estados se acumulan en RAM (maximo 256) durante marcha/frenado. Se muestrea para el registro cada 50 ms durante movimiento y asentamiento, cada 5 s en reposo y cuando cambia el estado/comando. El control sigue leyendo cada ~1 ms mas el tiempo de ejecucion; ese intervalo no esta garantizado.
 
-Revision 3: se escribe flash SOLO con STBY apagado, sin freno activo. El guardado normal ocurre en DETENIDO despues de 800 ms. Si se acumulan 64 registros, se permite guardar en PAUSA, ASENTANDO o DETENIDO tras al menos 50 ms sin potencia, para que los cambios frecuentes de comando no llenen el buffer. Tambien guarda despues de apagar por fallo/fin. Durante esa escritura no se lee la PCM; cualquier cambio se detecta en la siguiente vuelta. El buffer lleno provoca parada, no perdida silenciosa de datos.
+Revision 3: se escribe flash SOLO con STBY apagado, sin freno activo. El guardado normal ocurre en DETENIDO despues de 800 ms. Si se acumulan 64 registros, se permite guardar en INICIO, PAUSA, ASENTANDO o DETENIDO tras al menos 50 ms sin potencia, para que los cambios frecuentes de comando no llenen el buffer. Tambien guarda despues de apagar por fallo/fin. Durante esa escritura no se lee la PCM; cualquier cambio se detecta en la siguiente vuelta. El buffer lleno provoca parada, no perdida silenciosa de datos.
 
 No se garantiza conservar el ultimo tramo ante corte brusco de alimentacion: la RAM se pierde y una escritura puede quedar incompleta. Las lineas completas anteriores son las recuperables. Ausencia de FIN significa finalizacion no registrada, no exito.
 
@@ -109,3 +109,5 @@ Referencia: [MicroPython WDT](https://docs.micropython.org/en/latest/library/mac
 Revision 2 corrige la parada por limite de archivo observada en prueba_08.jsonl (130902 bytes, siguiente linea excedia 131072). Los archivos 06 y 07 solo registran bloqueo de arranque por watchdog; no prueban por si solos que la escritura originara esos reinicios. El watchdog y los limites del motor se conservan.
 
 Revision 3: corregido BUFFER_LLENO observado a los 20462 ms. Una simulacion con cambios de comando cada 1100 ms reprodujo el fallo anterior; ahora guarda durante las pausas sin habilitar escritura con el driver activo. Se mantienen los limites de motor y el watchdog.
+
+Revision 4: habilita tambien el guardado preventivo durante INICIO, con STBY=0, sin freno y al menos 50 ms sin potencia. La version 3 podia llenar el buffer si GP15 cambiaba continuamente antes de estabilizarse. Caso reproducido con entrada que alterna cada 2 ms; el controlador no habilita movimiento y conserva esos cambios en los registros. Esto no confirma la causa de una parada real sin leer su version y las lineas anteriores al fallo.
