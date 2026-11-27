@@ -1,18 +1,21 @@
 # DIY IMRC / CMCV controller for Ford F-150
 
-[Español](README.es.md) · [Hardware](docs/en/hardware.md) · [Install](docs/en/installation.md) · [Configuration](docs/en/configuration.md)
+[Español](README.es.md) · [Documentation](docs/README.md) · [Hardware](docs/en/hardware.md) · [Install](docs/en/installation.md) · [Configuration](docs/en/configuration.md)
 
-A Raspberry Pi Pico replacement controller for a failed intake Charge Motion
-Control Valve actuator PCB. It reuses the original housing, gears and RS-365SH
-motor, reads the PCM command through a PC817, detects the two endpoints with an
-SS49E Hall sensor, and drives a TB6612FNG. An open-collector Monitor stage reports
-confirmed opening back to the PCM.
+I built this controller to replace the burned-out circuit board in the intake
+Charge Motion Control Valve actuator on my **2007 Ford F-150 FX4, 5.4 L 3V**.
+I wanted to keep the original housing, gears and RS-365SH motor instead of buying
+a complete replacement actuator.
 
-**Tested vehicle:** the owner's 2007 Ford F-150 FX4, 5.4 L 3-valve engine.
-On **2026-11-27**, the owner reported that the finished hardware was installed and
-had been operating correctly for weeks. Earlier testing also reported scanner
-recognition of actuation without fault codes. This is experience with one build;
-compatibility with other engines, model years or actuator revisions is unverified.
+The replacement uses a Raspberry Pi Pico, a TB6612FNG motor driver and an SS49E
+Hall sensor to detect the two endpoint magnets. A PC817 reads the PCM command,
+and an open-collector Monitor circuit reports confirmed opening back to the PCM.
+
+As of **November 2026**, I've had the finished assembly installed and working
+correctly for several weeks. During testing, my scanner recognized the actuation
+and no fault codes appeared. I'm sharing the code and wiring so others can build
+on this project. I've tested it on my truck; compatibility with other engines,
+model years and actuator revisions still needs to be checked.
 
 ## What the permanent firmware does
 
@@ -34,18 +37,18 @@ compatibility with other engines, model years or actuator revisions is unverifie
 2. Confirm your sensor positions, motor direction and [configuration](docs/en/configuration.md).
 3. Follow the [installation and commissioning guide](docs/en/installation.md).
 
-The installed firmware is **[`pico_final/`](pico_final/)**. Copy its five package
+The firmware I use is **[`pico_final/`](pico_final/)**. Copy its five package
 modules into `/pico_final/` on the Pico and copy its `main.py` to **`/main.py`**.
 Do not flatten all files into the Pico root or mix them with the archived test
 programs. The controller may move the motor automatically after power-up.
 
 ## Hardware boundaries
 
-The reference uses two LM2596 buck modules (motor and logic), a common ground,
-and both TB6612 channels wired together as used in this build. It is not a
-manufacturer-qualified automotive design. The repository does not establish
-load-dump/transient compliance, temperature qualification or a universally safe
-driver current rating. PWM and timeout are not current limiting.
+My setup uses two LM2596 buck modules (motor and logic), a common ground,
+and both TB6612 channels wired together. This is a DIY repair with testing on
+my truck. Automotive transient and temperature qualification are beyond the
+testing documented here, and the driver rating must be evaluated for each build.
+PWM and timeout are not current limiting.
 
 There is no motor-current, temperature or VM-voltage measurement. Recovery retries
 are unlimited, so a persistent jam can cause repeated attempts. Endpoint thresholds
@@ -64,9 +67,10 @@ See the hardware guide for the power-input details that remain unspecified.
 | `docs/archive/` | Superseded diagrams and development notes |
 | `tools/` | Test runner, repository checks and release packaging |
 
-Local virtual environments, device backups, test recordings and Python bytecode
-are excluded. Historical diagrams are explicitly archived because they can show
-different wiring or omit the Monitor stage.
+I kept the earlier experiments and diagrams in `legacy/` and `docs/archive/`
+to preserve the development work. Some show different wiring or omit the Monitor
+stage, so use the current guides when building your own version. Device backups,
+raw logs and local development files are excluded from the release.
 
 ## Development
 

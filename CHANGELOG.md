@@ -2,7 +2,7 @@
 
 ## Public repository preparation — 2026-11-27
 
-- Documented the owner's report of the installed assembly working for weeks.
+- Documented several weeks of installed operation on my 2007 F-150 FX4.
 - Established `pico_final/` as the permanent firmware source, with current English
   and Spanish guides. Firmware behavior and calibration values were preserved.
 - Moved earlier firmware and tests to `legacy/`, historical documents to
@@ -11,6 +11,8 @@
 - Selected GPL-3.0-only for the project code and included the full license.
 - Removed tracked Python caches from the current index; historical commits still
   require consideration before publishing their history (see `docs/RELEASING.md`).
+- Unified the project voice, added a bilingual documentation index and recorded
+  the repository review in `docs/en/project-review.md` and `docs/es/project-review.md`.
 
 ## final-1 — installed 2026-11-02
 
@@ -22,5 +24,5 @@
 - Initial local validation: 51 host tests across final and historical code, plus
   compilation and hash-verified installation on the development Pico.
 
-Hardware commissioning and later owner-reported operation are distinct from the
-host simulations; no broader model compatibility or certification is claimed.
+Vehicle results describe my installation. Host simulations check software behavior;
+neither establishes compatibility with every vehicle or automotive certification.

@@ -1,12 +1,12 @@
-# Publication and releases / Publicación
+# Releases / Publicación
 
-## Prepared content
+[Documentation](README.md) · [Project](../README.md) · [Proyecto](../README.es.md)
 
-The permanent firmware remains `final-1`; repository organization is not a new
-motor-control revision. The owner reported installed operation for weeks on
-2026-11-27. Current guides distinguish that report from host-test evidence.
+## English
 
-Build and inspect the clean artifacts:
+### Prepare a release
+
+From the repository root, with Python 3.11 or later:
 
 ```sh
 python tools/run_tests.py
@@ -14,65 +14,85 @@ python tools/check_repo.py
 python tools/build_release.py
 ```
 
-The firmware ZIP contains `/main.py` and `/pico_final/` in the correct device
-layout, plus `INSTALL.txt`, `LICENSE` and a manifest for the PC. Only the launcher and
-package Python files belong on the Pico. The source ZIP includes current docs,
-tests and labeled archives, but excludes `.git`, backups, logs, virtual
-environments, editor settings and Python bytecode. Each ZIP has a file manifest;
-`dist/SHA256SUMS` contains the hashes of the ZIPs.
+The tools run on the PC. They do not connect to a Pico, start the motor, upload
+firmware, push commits or change repository visibility. GitHub Actions runs the
+same checks and packages artifacts; its run must succeed separately on GitHub.
 
-The project code uses [GPL-3.0-only](../LICENSE), selected by the owner. Keep the
-license with both artifacts. The firmware ZIP is an installation convenience;
-the matching source ZIP includes the code, tests and packaging scripts.
+### Publish both packages
 
-## Local validation — 2026-11-27
+| Artifact in `dist/` | Contents and use |
+| --- | --- |
+| `imrc-final-1-firmware.zip` | `/main.py` and five modules under `/pico_final/`, ready for the device layout; `INSTALL.txt`, `LICENSE` and `MANIFEST.json` stay on the PC |
+| `imrc-final-1-source.zip` | Source, tests, current documentation, tools and labeled development archives |
+| `SHA256SUMS` | SHA-256 checksums of both ZIPs |
 
-- 18 permanent-controller tests and 33 historical regression tests passed.
-- All 27 preserved Python source files matched the pre-organization backup,
-  including all six permanent firmware files. No motor settings were changed.
-- Syntax and local documentation links passed the offline repository check.
-- ZIP contents are verified byte-for-byte against their input, with SHA-256
-  file manifests and archive hashes. The extracted source is tested separately.
-- GitHub Actions is configured; it has not run remotely as part of this work.
-- No Pico connection, upload, motor movement or new vehicle test was performed.
+Each ZIP has a manifest of file sizes and SHA-256 hashes. Inspect it before
+publishing. Keep the [GPL-3.0-only license](../LICENSE) with the code and provide
+the matching source alongside the firmware. Do not upload backups or raw logs.
 
-## Existing Git history needs a deliberate choice
+`final-1` is the firmware version in `pico_final/config.py`. A documentation-only
+change can produce a new source ZIP with the same firmware version. Rebuild after
+edits, and use the archive checksums plus a distinct Git tag/release label to
+identify published artifacts. Do not silently replace an existing release ZIP.
 
-The five existing commits were inspected during preparation. Eight historical
-Python bytecode paths contain absolute local source filenames. Removing caches
-from today's tree does **not** remove those copies from older commits. A targeted
-text scan found no matching private-key/API-token patterns; this is not an
-exhaustive secrets audit. Commit author names/emails also remain normal Git metadata.
+### Choose the public Git history
 
-For a publication without that history, use the **clean source ZIP** to create a
-fresh repository with a fresh initial commit. Keep the old development repository
-privately for provenance. Do not copy its `.git` directory into the new repository.
-Alternatively, review and sanitize the old history before changing its visibility;
-history rewriting and force-pushing are separate operations and were not performed.
+The original development history contains Python caches with local source paths.
+Deleting caches from the latest tree does not remove older copies. The
+[dated review](en/project-review.md) records this finding.
 
-An `origin` remote already exists. The connected GitHub app could not retrieve its
-metadata during this work, so its visibility is not recorded as verified. Git
-transport could read its HEAD. No push, release creation or visibility change was
-performed by the repository preparation.
+For a fresh public history, extract the source ZIP into a new directory and create
+a new repository there. Do not copy the development repository's `.git` folder.
+The ZIP already excludes Git history, local backups, recordings and environments.
+Keep the original repository privately for development provenance.
 
-## Before publishing
+Publishing the existing history instead requires a separate history cleanup and
+review. A normal commit or `.gitignore` change does not perform that cleanup.
 
-- Preserve the selected GPL-3.0-only license and provide the corresponding source ZIP alongside firmware.
-- Review both ZIP manifests and the current diagrams. Do not package the local
-  backup directory or raw logs.
-- Include photos or an as-built power-input drawing if the owner wants an exact
-  reproduction guide; do not infer undocumented fuse/transient-protection values.
-- Publish the clean source and firmware artifacts with the test results and the
-  single-vehicle compatibility scope, without implying manufacturer endorsement.
+### Release description
+
+State the tested vehicle, firmware version, configuration changes and test
+results. Distinguish PC simulations from bench and installed-vehicle results.
+Link the current hardware guide, including any details still needed to reproduce
+the assembly. Publish photos or an as-built schematic when available; avoid
+inventing undocumented component values. Firmware changes require renewed
+bench validation appropriate to the change before vehicle use.
 
 ## Español
 
-Las versiones antiguas del historial incluyen cachés con rutas absolutas del PC.
-La exclusión actual no borra esas versiones pasadas. El ZIP de código fuente
-permite comenzar un repositorio público nuevo sin copiar `.git`, logs ni respaldos.
-Conserva el repositorio de desarrollo como referencia privada. Si prefieres
-publicar el historial existente, hay que revisarlo y limpiarlo por separado.
+### Preparar la publicación
 
-La licencia elegida es GPL-3.0-only; publica las fuentes junto al firmware. Esta preparación no cambió la visibilidad, no creó una
-release y no hizo push. Los detalles no documentados de la protección de entrada
-deben quedar identificados hasta disponer del esquema real del montaje.
+Ejecuta los tres comandos anteriores desde la raíz con Python 3.11 o posterior.
+Se ejecutan en el PC: no conectan el Pico, no mueven el motor, no cargan firmware
+ni publican en GitHub. GitHub Actions realiza las mismas comprobaciones; su
+ejecución remota debe verificarse por separado.
+
+### Publicar ambos paquetes
+
+El ZIP de firmware contiene `/main.py` y cinco módulos en `/pico_final/` con la
+estructura del dispositivo. `INSTALL.txt`, `LICENSE` y `MANIFEST.json` son para
+el PC. El ZIP de fuentes incluye código, pruebas, guías, herramientas e historia
+de desarrollo etiquetada. `SHA256SUMS` permite comprobar ambos ZIP.
+
+Conserva la licencia GPL-3.0-only y entrega las fuentes correspondientes junto
+al firmware. Revisa los manifiestos; no incluyas respaldos ni logs completos.
+`final-1` identifica el firmware. Un cambio solo documental puede generar otro
+ZIP con la misma versión: vuelve a empaquetar y usa un tag/nombre de publicación
+distinto y los hashes para identificarlo. No reemplaces silenciosamente un ZIP
+ya publicado.
+
+### Elegir el historial público
+
+El historial original contiene cachés con rutas locales. Borrarlas del árbol
+actual no elimina las copias antiguas; consulta el [informe](es/project-review.md).
+Para empezar limpio, extrae el ZIP de fuentes en otra carpeta y crea allí un
+repositorio nuevo, sin copiar `.git`. Conserva el repositorio anterior en privado.
+Publicar su historial requiere limpiarlo y revisarlo por separado.
+
+### Describir la versión
+
+Indica vehículo probado, versión, cambios de configuración y resultados. Distingue
+simulación en PC, banco y uso instalado. Enlaza las guías actuales y sus detalles
+pendientes de reproducción. Añade fotos o el esquema real cuando estén disponibles;
+no inventes componentes. Los cambios de firmware requieren comprobación de banco
+adecuada antes de usarlos en el vehículo.

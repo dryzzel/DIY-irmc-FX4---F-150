@@ -6,6 +6,22 @@ under `pico_final/` separate from historical experiments in `legacy/`.
 Contributions to the project code use the same [GPL-3.0-only license](LICENSE).
 Only submit material you have the right to distribute under those terms.
 
+## Documentation conventions / Convenciones de documentación
+
+Use first person for the project introduction and firsthand build results. Use
+direct instructions for installation and neutral technical language for behavior.
+Do not describe the maintainer as “the owner” or turn the public guides into a
+transcript of an assistant's work. Keep English and Spanish guides in sync.
+
+Keep historical claims in the archive with their revision context. Put a dated
+review in the review report, not in the permanent installation instructions.
+The [documentation index](docs/README.md) identifies the current reading order.
+
+La introducción y las experiencias del montaje van en primera persona; las guías,
+como instrucciones directas. Evita hablar del autor como «el propietario» y
+mantén ambos idiomas coherentes. Conserva las revisiones antiguas en el archivo
+histórico y los resultados de revisión en su informe fechado.
+
 Before proposing a change:
 
 ```sh

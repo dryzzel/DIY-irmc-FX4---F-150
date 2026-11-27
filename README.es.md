@@ -1,19 +1,21 @@
 # Controlador DIY IMRC / CMCV para Ford F-150
 
-[English](README.md) · [Hardware](docs/es/hardware.md) · [Instalación](docs/es/installation.md) · [Configuración](docs/es/configuration.md)
+[English](README.md) · [Documentación](docs/README.md) · [Hardware](docs/es/hardware.md) · [Instalación](docs/es/installation.md) · [Configuración](docs/es/configuration.md)
 
-Controlador con Raspberry Pi Pico para sustituir la placa averiada del actuador
-CMCV de la admisión. Reutiliza carcasa, engranajes y motor RS-365SH originales.
-Lee la orden de la PCM mediante un PC817, detecta los extremos con un SS49E,
-acciona un TB6612FNG y devuelve la confirmación de apertura por una etapa Monitor
-de colector abierto.
+Hice este controlador para reemplazar la placa quemada del actuador CMCV de
+la admisión de mi **Ford F-150 FX4 2007, motor 5.4 L 3V**. Quería conservar
+la carcasa, los engranajes y el motor RS-365SH originales, sin tener que comprar
+el actuador completo.
 
-**Vehículo probado:** Ford F-150 FX4 2007 del propietario, motor 5.4 L de 3 válvulas.
-El **27 de noviembre de 2026**, el propietario confirmó que terminó el montaje,
-lo instaló y llevaba semanas funcionando correctamente. En pruebas anteriores
-también indicó que el escáner reconocía la actuación sin códigos de falla.
-Es experiencia de un montaje; no confirma compatibilidad con otros motores,
-años ni revisiones del actuador.
+El reemplazo usa un Raspberry Pi Pico, un driver TB6612FNG y un sensor Hall SS49E
+para detectar los dos imanes de los extremos. Un PC817 lee la orden de la PCM,
+y un circuito Monitor de colector abierto devuelve la confirmación de apertura.
+
+A **noviembre de 2026**, ya tengo el montaje terminado, instalado y funcionando
+correctamente desde hace varias semanas. Durante las pruebas, el escáner reconoció
+la actuación y no aparecieron códigos de falla. Comparto el código y el cableado
+para que otros puedan aprovechar el proyecto. Lo he probado en mi camioneta;
+la compatibilidad con otros motores, años y revisiones del actuador debe comprobarse.
 
 ## Funcionamiento
 
@@ -34,17 +36,18 @@ años ni revisiones del actuador.
 2. Medir los extremos, confirmar el sentido y revisar la [configuración](docs/es/configuration.md).
 3. Seguir la [instalación y puesta en marcha](docs/es/installation.md).
 
-El programa permanente está en **[`pico_final/`](pico_final/)**. Sus cinco módulos
+El programa que uso está en **[`pico_final/`](pico_final/)**. Sus cinco módulos
 de paquete van en `/pico_final/` del Pico y su lanzador `main.py` va en **`/main.py`**.
 No copiar todos los módulos sueltos a la raíz ni mezclarlos con las pruebas
 históricas. El motor puede actuar automáticamente después de encender.
 
 ## Límites del montaje
 
-La referencia utiliza dos LM2596, tierra común y los dos canales del TB6612
-conectados juntos como en este montaje. No es un diseño automotriz certificado.
-No hay validación publicada de transitorios, temperatura ni capacidad universal
-de corriente. PWM y timeout no limitan la corriente.
+Mi montaje utiliza dos LM2596, tierra común y los dos canales del TB6612
+conectados juntos. Es una reparación DIY probada en mi camioneta. La calificación
+automotriz de transitorios y temperatura queda fuera de las pruebas documentadas
+aquí, y la capacidad del driver debe evaluarse en cada montaje. PWM y timeout
+no limitan la corriente.
 
 No se mide corriente, temperatura ni tensión VM. Los reintentos son ilimitados:
 un atasco persistente puede causar nuevos esfuerzos. Los umbrales pertenecen a
@@ -63,9 +66,10 @@ hardware identifica los detalles de protección de alimentación no documentados
 | `docs/archive/` | Diagramas anteriores y notas de desarrollo |
 | `tools/` | Pruebas, revisión del repositorio y paquetes de publicación |
 
-Los respaldos del Pico, entornos locales, logs y cachés no se publican. Los
-diagramas antiguos están archivados porque algunos muestran otra revisión o
-no incluyen Monitor.
+Conservé los experimentos y diagramas anteriores en `legacy/` y `docs/archive/`
+como parte del desarrollo. Algunos muestran otro cableado o no incluyen Monitor;
+para reproducir el montaje, sigue las guías actuales. Los respaldos del Pico,
+logs completos y archivos locales de desarrollo quedan fuera de la publicación.
 
 ## Desarrollo
 

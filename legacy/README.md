@@ -12,6 +12,23 @@ The `pico_prueba_camioneta/` subdirectory is the former autonomous test recorder
 It has a time/storage limit and a different fault policy. It remains here for
 reproducing historical tests, not as the installation source.
 
+## Which program is which? / Qué programa es cada uno
+
+| Files | Role / Función |
+| --- | --- |
+| `main.py`, `config.py`, `controller.py` | Early controller with commissioning defaults / Controlador inicial con ajustes de puesta en marcha |
+| `prueba_tb6612.py` | Manual menu, Hall learning and bench movement / Menú manual, aprendizaje Hall y movimiento de banco |
+| `prueba_camioneta.py`, `main_prueba_camioneta.py` | Temporary automatic recorder / Registrador automático temporal |
+| `prueba_entrada.py`, `indicador_imrc.py` | Command-input diagnostics / Diagnóstico de la entrada de comando |
+| `pico_prueba_camioneta/` | Historical device-copy bundle with its own launcher / Paquete histórico para copiar al Pico con su propio lanzador |
+| `test_*.py` | Host regression tests / Pruebas de regresión en el PC |
+
+At the November 2026 review, five modules in `pico_prueba_camioneta/` were identical
+to their counterparts here; its `main.py` was different. These copies are retained
+as a historical device bundle, not independently maintained firmware branches.
+La revisión de noviembre de 2026 encontró cinco módulos iguales y un `main.py`
+distinto. Se conserva el paquete histórico; no son dos versiones finales activas.
+
 Run the old host simulations in their own process and working directory:
 
 ```sh

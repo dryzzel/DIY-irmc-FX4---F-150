@@ -2,11 +2,14 @@
 
 [Home](../../README.md) · [Español](../es/hardware.md)
 
-This is the signal-level reference for the owner's working 2007 F-150 FX4 5.4 L
-3V build. It consolidates the confirmed command, Hall and Monitor connections.
-It is not a complete production schematic: the exact installed input-protection
-parts, fuse value, enclosure details and component brands are not fully recorded.
-The successful installed operation was reported by the owner on 2026-11-27.
+This guide documents the command, Hall and Monitor wiring I used in my 2007
+F-150 FX4 5.4 L 3V. Read the [project introduction](../../README.md) for the build's
+background and results. The tables below identify the connections by signal name.
+
+The documentation still needs the exact input-protection parts, fuse value,
+enclosure details and component brands to become a complete reproduction guide.
+Those omissions concern the documentation; they do not mean the installed build
+is still awaiting its first vehicle test.
 
 ## Components
 
@@ -163,7 +166,7 @@ The PCM supplies the high level. The circuit only pulls Monitor down; do not
 connect the 5 V/12 V regulator output to CMCVM. GP18=1 commands low/OPEN;
 GP18=0 releases the line, with high interpreted as CLOSED. A high level during
 movement or a fault is not proof that the mechanism is physically closed.
-Tests reported approximately 12 V released and 0 V asserted with the PCM connected.
+With the PCM connected, I measured approximately 12 V released and 0 V asserted.
 
 Identify the KN2222A base/emitter/collector for the exact part; reversing collector
 and emitter caused a failed test during development. A temporary bench pull-up

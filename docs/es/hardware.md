@@ -2,11 +2,14 @@
 
 [Inicio](../../README.es.md) · [English](../en/hardware.md)
 
-Referencia de señales del montaje del propietario: F-150 FX4 2007, 5.4 L 3V.
-Reúne el comando, Hall y Monitor confirmados. No es un esquema de producción
-completo: no quedaron registrados todos los detalles de protección de entrada,
-valor de fusible, marcas de componentes y fijación mecánica. El propietario
-confirmó el 27-11-2026 que estaba instalado y funcionando correctamente por semanas.
+Esta guía describe el cableado de comando, Hall y Monitor que utilicé en mi
+F-150 FX4 2007, 5.4 L 3V. La [introducción](../../README.es.md) cuenta el motivo
+del proyecto y los resultados. Las conexiones se identifican por nombre de señal.
+
+Para completar la guía de reproducción falta documentar los componentes exactos
+de protección de entrada, el fusible, la carcasa y las marcas utilizadas.
+Son detalles pendientes de documentación; no significa que el montaje instalado
+esté esperando su primera prueba en la camioneta.
 
 ## Componentes
 
@@ -156,7 +159,7 @@ Colector KN2222A -------------- C1442.4 CMCVM
 La PCM aporta el voltaje alto. El circuito solo lleva Monitor a tierra: no conectar
 la salida de 5 V ni de 12 V del regulador a CMCVM. GP18=1 da bajo/ABIERTO; GP18=0
 libera la línea, alto interpretado como CERRADO. Alto durante movimiento/fallo
-no confirma cierre físico. Las pruebas reportaron aproximadamente 12 V liberado
+no confirma cierre físico. Con la PCM conectada medí aproximadamente 12 V liberado
 y 0 V activado con la PCM conectada.
 
 Verificar emisor/base/colector del KN2222A exacto. Invertir emisor y colector causó
